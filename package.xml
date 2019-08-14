@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+    <name>Lengow_Export</name>
+    <version>1.0.0</version>
+    <stability>stable</stability>
+    <license uri="http://www.opensource.org/licenses/osl-3.0.php">OSL v3.0</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Ce module vous permettra d'exporter votre catalogue produits au format CSV ou XML &#xE0; destination de la solution Lengow afin de diffuser votre catalogue produits vers quelques 120 canaux possible.</summary>
+    <description>Lengow est une solution SaaS permettant &#xE0; un e-commer&#xE7;ant d'optimiser ses catalogues produits vers les comparateurs de prix, r&#xE9;gies d'affiliation mais aussi marketplaces et sites de Cashback.
+
+Le principe est que la solution r&#xE9;cup&#xE8;re le catalogue produits du marchand, configure, optimise et tracke les informations des campagnes marchandes afin de restituer &#xE0; l'e-commer&#xE7;ant les statistiques sous forme de tableaux de bords et graphiques.
+Ce processus permet aux e-commer&#xE7;ants d'optimiser leurs flux et leurs co&#xFB;ts d'acquisition sur chaque support de diffusion.</description>
+    <notes>Version 1.0.0 stable</notes>
+    <authors><author><name>Froger</name><user>auto-converted</user><email>mickael@mengow.com</email></author><author><name>Lengow</name><user>auto-converted</user><email>technique@lengow.com</email></author><author><name>Lengow</name><user>auto-converted</user><email>contact@lengow.com</email></author></authors>
+    <date>2010-03-15</date>
+    <time>09:43:22</time>
+    <contents><target name="magelocale"><dir name="en_US"><file name="Lengow_Export.csv" hash="abeaea80f731b4fa350091e0807cdbee"/><file name="Lengow_Information.csv" hash="86986a0717caed093e4178acf407f26c"/></dir><dir name="fr_FR"><file name="Lengow_Export.csv" hash="0bc75b767e6a51b07748f2362ff3f6f2"/><file name="Lengow_Information.csv" hash="cab993c6e862f67cef4a05229cbb2026"/></dir></target><target name="magelocal"><dir name="Lengow"><dir name="Export"><dir name="controllers"><file name="IndexController.php" hash="eeff7471a22a8d64aebb5b4ecb5cbac9"/></dir><dir name="etc"><file name="config.xml" hash="8210a1ad7fd08092b95a55de0498092c"/><file name="system.xml" hash="da7eb0bc7e16b26bae938a79fe4f5e05"/></dir><dir name="Helper"><file name="Data.php" hash="9bb8759af094885106efb1a53fe98b07"/></dir></dir><dir name="Information"><dir name="etc"><file name="config.xml" hash="c83d19a3acd4186b7b2ea4f92abc8104"/><file name="system.xml" hash="e16fa28f8249be84adf447c099adeb95"/></dir><dir name="Helper"><file name="Data.php" hash="8063a9cfe2cf944b1d1a6ac65a6b57d0"/></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="Lengow_All.xml" hash="d212244e63e3d5dd55d33981a9d725bf"/></dir></target></contents>
+    <compatible/>
+    <dependencies/>
+</package>

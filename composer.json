@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Lengow_Export",
+    "type": "magento-module",
+    "license": "OSL-v3.0",
+    "homepage": "",
+    "description": "Ce module vous permettra d'exporter votre catalogue produits au format CSV ou XML à destination de la solution Lengow afin de diffuser votre catalogue produits vers quelques 120 canaux possible.",
+    "authors": [
+    {
+        "name": "Froger",
+        "email": "mickael@mengow.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

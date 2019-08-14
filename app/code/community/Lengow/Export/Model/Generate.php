@@ -200,7 +200,7 @@ class Lengow_Export_Model_Generate extends Varien_Object {
                     $product->getTypeInstance(true)->getChildrenIds($product->getId()),
                     function (array $reduce, $value) {
                         return array_merge($reduce, $value);
-                    }, []);
+                    }, array());
                 foreach ($childrenIds as $childrenId) {
                     $product_temporary = Mage::getModel('catalog/product')
                                       ->setOriginalCurrency($this->getOriginalCurrency())

@@ -24,6 +24,17 @@
         </reference>
     </adminhtml_lengow_log_index>
     
+    <adminhtml_lengow_debug_index>
+        <reference name="head">
+            <action method="setTitle" translate="title">
+                <title>Debug</title>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="lensync/adminhtml_cron" name="cron.grid" template="lengow/debug/index.phtml"></block>
+        </reference>
+    </adminhtml_lengow_debug_index>
+
     <adminhtml_lengow_export_index>
         <reference name="head">
             <action method="setTitle" translate="title">

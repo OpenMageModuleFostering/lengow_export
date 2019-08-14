@@ -87,7 +87,7 @@ class Lengow_Sync_Model_Import extends Varien_Object {
             $error = (string) $orders->error;
             if (strtolower($error) == 'no way')
                 $message = $this->_helper->__('API\'s connection refused with IP %s', (string) $orders->ip);
-            $error = $this->_helper->__('Error on lengow webservice'.isset($message) ? ': ' . $message : json_encode($orders));
+            $error = 'Error on lengow webservice ' . (isset($message) ? ': ' . $message : json_encode($orders));
             $this->_helper->log($error);
             return array('new' => 0, 'update' => 0, 'error' => $error);
         } else {

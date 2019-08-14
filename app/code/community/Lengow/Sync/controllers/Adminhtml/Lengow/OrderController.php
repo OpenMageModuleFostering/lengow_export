@@ -112,7 +112,7 @@ class Lengow_Sync_Adminhtml_Lengow_OrderController extends Mage_Adminhtml_Contro
                     $api_token_lengow   = $lentracker_config->get('general/api_key');
                     // if ID Customer or token API are empty -> stop import
                     if (empty($id_lengow_customer) || !is_numeric($id_lengow_customer) || empty($api_token_lengow)) {
-                        $message = 'ID customer or token API is empty. Please make sure it is saved in your plugin configuration';
+                        $message = 'Please checks your plugin configuration. ID customer or token API is empty';
                         $this->_getSession()->addError(Mage::helper('lensync')->__($message));
                         Mage::helper('lensync/data')->log($message);
                         break;
@@ -155,19 +155,19 @@ class Lengow_Sync_Adminhtml_Lengow_OrderController extends Mage_Adminhtml_Contro
             }
             if($result_new > 0) {
                 $this->_getSession()->addSuccess(Mage::helper('lensync')->__('%d orders are imported', $result_new));
-                Mage::helper('lensync/data')->log(Mage::helper('lensync')->__('%d orders are imported', $result_new));
+                Mage::helper('lensync/data')->log($result_new . ' orders are imported');
             }
             if($result_update > 0) {
                 $this->_getSession()->addSuccess(Mage::helper('lensync')->__('%d orders are updated', $result_update));
-                Mage::helper('lensync/data')->log(Mage::helper('lensync')->__('%d orders are updated', $result_update));
+                Mage::helper('lensync/data')->log($result_update . ' orders are updated');
             }
             if($result_new == 0 && $result_update == 0) {
                 $this->_getSession()->addSuccess(Mage::helper('lensync')->__('No order available to import'));
-                Mage::helper('lensync/data')->log(Mage::helper('lensync')->__('No order available to import'));
+                Mage::helper('lensync/data')->log('No order available to import');
             }
             if ($store_count == $store_disabled) {
-                $this->_getSession()->addError(Mage::helper('lensync')->__('No store enabled to import. Please check lengow import configuration'));
-                Mage::helper('lensync/data')->log(Mage::helper('lensync')->__('No store enabled to import. Please check lengow import configuration'));
+                $this->_getSession()->addError(Mage::helper('lensync')->__('Please checks your plugin configuration. No store enabled to import'));
+                Mage::helper('lensync/data')->log('Please checks your plugin configuration. No store enabled to import');
             }
             Mage::helper('lensync/data')->log('## End manual import ##');
             Mage::getSingleton('lensync/config')->importSetEnd();

@@ -110,7 +110,7 @@
     <marketplace name="priceminister">
         <api>https://wsdl.lengow.com/wsdl/priceminister/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <states>
-            <state name="New">
+            <state name="new">
                 <actions>
                     <action type="accept">accept</action>
                     <action type="shipped">acceptOrder</action>
@@ -158,6 +158,7 @@
                     <value>Tatex</value>
                     <value>GLS</value>
                     <value>DHL</value>
+                    <value>DPD</value>
                     <value>Courrier Suivi</value>
                 </accepted_values>
             </param>
@@ -2380,6 +2381,77 @@
     </marketplace>
     <marketplace name="darty">
         <api>https://wsdl.lengow.com/wsdl/darty/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>carrier_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="auchan">
+        <api>https://wsdl.lengow.com/wsdl/auchan/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <states>
             <state name="STAGING">
                 <lengow>new</lengow>

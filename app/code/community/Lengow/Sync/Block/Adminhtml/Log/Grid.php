@@ -14,7 +14,7 @@ class Lengow_Sync_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_G
         parent::__construct();
         $this->setId('sales_sync_log_grid');
         $this->setUseAjax(true);
-        $this->setDefaultSort('date');
+        $this->setDefaultSort('id');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
     }

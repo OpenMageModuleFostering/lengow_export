@@ -14,27 +14,16 @@ class Lengow_Sync_ApiController extends Mage_Core_Controller_Front_Action {
         echo 'Please specify an action';
     }
 
-    public function taxAction() {
-        $helper = Mage::helper('export/security');
-        if($helper->checkIp()) {
-            $id_order = $this->getRequest()->getParam('id');
-            $new_tax = $this->getRequest()->getParam('rate');
-            if($order = Mage::getModel('sales/order')->load($id_order)) {
-                if($order->hasFromLengow()) {
-                    $this->_rebuildOrder($order);
-                }
-            } else {
-                echo 'Order not find';
-            }
+    public function checkAction() {
+        $_helper_export = Mage::helper('export/security');
+        $_helper_api = Mage::helper('sync/api');
+        if($_helper_export->checkIp()) {
+            $return = array('magento_version' => Mage::getVersion(),
+                            'lengow_version' => $_helper_api->getVersion());
+            echo Mage::helper('core')->jsonEncode($return);
         } else {
             echo 'Unauthorised ip : ' . $_SERVER['REMOTE_ADDR'];
         }
     } 
 
-    private function _rebuildOrder($order) {
-    }
-
-    private function _rebuildInvoice($order) {
-        
-    }
 }

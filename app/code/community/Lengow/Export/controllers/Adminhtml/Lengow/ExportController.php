@@ -5,17 +5,17 @@
  * @category    Lengow
  * @package     Lengow_Export
  * @author      Ludovic Drin <ludovic@lengow.com>
- * @copyright   2013 Lengow SAS 
+ * @copyright   2013 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 class Lengow_Export_Adminhtml_Lengow_ExportController extends Mage_Adminhtml_Controller_Action {
-	
+
 	public function indexAction() {
         $this->loadLayout();
-        $this->renderLayout();        
+        $this->renderLayout();
         return $this;
     }
-    
+
     /**
      * Product grid for AJAX request
      */
@@ -25,7 +25,7 @@ class Lengow_Export_Adminhtml_Lengow_ExportController extends Mage_Adminhtml_Con
             $this->getLayout()->createBlock('export/adminhtml_product_grid')->toHtml()
         );
     }
-	    
+
 	public function massPublishAction() {
         $_product_ids = (array) $this->getRequest()->getParam('product');
         $_store_id = (int)$this->getRequest()->getParam('store', 0);
@@ -40,7 +40,7 @@ class Lengow_Export_Adminhtml_Lengow_ExportController extends Mage_Adminhtml_Con
                     							   'store_id' => $_store_id,
                     							   'lengow_product' => $_publish));
                 $resource->saveAttribute($product,'lengow_product');
-                
+
             }
             $this->_getSession()->addSuccess(
                 Mage::helper('export')->__('Total of %d record(s) were successfully updated', count($_product_ids))
@@ -55,10 +55,10 @@ class Lengow_Export_Adminhtml_Lengow_ExportController extends Mage_Adminhtml_Con
 
         $this->_redirect('*/*/', array('store'=> $_store_id));
     }
-	
+
 
 	protected function _getSession() {
 		return Mage::getSingleton('adminhtml/session');
 	}
-		
+
 }

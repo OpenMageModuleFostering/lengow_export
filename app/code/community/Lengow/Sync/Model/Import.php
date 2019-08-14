@@ -73,7 +73,8 @@ class Lengow_Sync_Model_Import extends Varien_Object {
         if(Mage::app()->getStore()->getCode() != 'admin')
             Mage::app()->setCurrentStore('admin');          
         $this->_helper = Mage::helper('sync/data');        
-        $this->_config = Mage::getSingleton('sync/config');
+        $this->_config = Mage::getSingleton('sync/config')
+                             ->setStore($args['id_store']);
         $this->_checkVersionMarketplaceXML();
         $connector = Mage::getSingleton('sync/connector');    
         self::$import_start = true;
@@ -86,23 +87,33 @@ class Lengow_Sync_Model_Import extends Varien_Object {
                                                     'id_group' => $this->_config->getConfig('tracker/general/group'),
                                                     'state' => 'plugin'));
         if(!is_object($orders)) {
-            $this->_helper->log('Error on lengow webservice');
-            return false;
+            $error = $this->_helper->__('Error on lengow webservice');
+            $this->_helper->log($error);
+            return array('new' => 0,
+                         'update' => 0,
+                         'error' => $error);
         } else {
             $find_count_orders = count($orders->orders->order);
             $this->_helper->log('Find ' . $find_count_orders . ' order' . ($find_count_orders > 1 ? 's' : ''));
         }
         //LengowCore::debug($orders);
         $count_orders = (integer) $orders->orders_count->count_total;
+        if(isset($orders->error) && (string) $orders->error == 'No Way') {
+            $error = $this->_helper->__('API\'s connection refused with IP %s', (string) $orders->ip);
+            $this->_helper->log($error);
+            return array('new' => 0,
+                         'update' => 0,
+                         'error' => $error);
+        }
         if($count_orders == 0) {
             $this->_helper->log('No orders to import between ' . $args['dateFrom'] . ' and ' . $args['dateTo'], $this->force_log_output);
             return false;
         }
-        $model_order = Mage::getModel('sync/order');
+        $model_order = Mage::getModel('sync/order', $args['id_store']);
         foreach($orders->orders->order as $key => $data) {
             $lengow_order = $data;
             $lengow_order_id = (string) $lengow_order->order_id;
-            if($this->_config->isDebugMode()) {
+            if($this->_config->isDebugMode() && !$this->getForceUpdate()) {
                 $lengow_order_id = $lengow_order_id . time();
             }
             $marketplace = Mage::getModel('sync/marketplace');
@@ -123,10 +134,14 @@ class Lengow_Sync_Model_Import extends Varien_Object {
                 $this->_config->getOrderState($lengow_status);
                 // Update status' order only if in process or shipped
                 if($order_imported->getState() != $this->_config->getOrderState($lengow_status)) {
-                    // Change state process to shipped
-                    if($order_imported->getState() == $this->_config->getOrderState('processing')
+                    if($order_imported->getState() == $this->_config->getOrderState('new') // Change state process to processing
                        && $lengow_order->order_status->lengow == 'shipped') {
-                        $order_imported->toShip($order, 
+                        $model_order->toInvoice($order_imported);
+                        $this->_helper->log('Order ' . $lengow_order_id . ' : update state to processing');
+                        $count_orders_updated++;
+                    } else if($order_imported->getState() == $this->_config->getOrderState('processing') // Change state process to shipped
+                       && $lengow_order->order_status->lengow == 'shipped') {
+                        $model_order->toShip($order_imported, 
                                                 (string) $lengow_order->tracking_informations->tracking_carrier, 
                                                 (string) $lengow_order->tracking_informations->tracking_method, 
                                                 (string) $lengow_order->tracking_informations->tracking_number);
@@ -135,7 +150,7 @@ class Lengow_Sync_Model_Import extends Varien_Object {
                     } else if(($order_imported->current_state == $this->_config->getOrderState('process') // Change state process or shipped to cancel
                         || $order_imported->current_state == $this->_config->getOrderState('shipped'))
                        && $lengow_order->order_status->lengow == 'canceled') {
-                        $order_imported->toCancel();
+                        $model_order->toCancel($order_imported);
                         $this->_helper->log('Order ' . $lengow_order_id . ' : update state to cancel');
                         $count_orders_updated++;
                     }
@@ -145,19 +160,36 @@ class Lengow_Sync_Model_Import extends Varien_Object {
                 $lengow_order_state = (string) $lengow_order->order_status->marketplace;
                 $id_order_magento = (string) $lengow_order->order_external_id;
                 if(($marketplace->getStateLengow($lengow_order_state) == 'processing'
-                    || $marketplace->getStateLengow($lengow_order_state) == 'shipped') && !$id_order_magento) {
-                    ////try {
-                        $order = Mage::getModel('sync/order');
+                    || $marketplace->getStateLengow($lengow_order_state) == 'shipped' 
+                    || ($marketplace->getStateLengow($lengow_order_state) == 'new' && $this->_config->get('orders/pending'))) && !$id_order_magento) {
+                        // Check payment status 
+                        $lengow_order_payment_status = (string) $lengow_order->order_payment->payment_status;
+                        // Break new order if not in pending payment
+                        $_to_order = true;
+                        if($marketplace->getStateLengow($lengow_order_state) == 'new' && $this->_config->get('orders/pending')) {
+                            $_to_order = false;
+                            if(empty($lengow_order_payment_status) || !$marketplace->getStatePaymentLengow($lengow_order_payment_status) == 'pending') {
+                                $this->_helper->log('Order ' . $lengow_order_id . ' : order\'s status ( ' . $lengow_order_state . ' - ' . $lengow_order_payment_status . ') not available to import');
+                                continue;
+                            }
+                        }
+                        $order = Mage::getModel('sync/order', $args['id_store']);
                         // Create or Update customer with addresses
                         $customer = Mage::getModel('sync/customer_customer');
-                        $customer->setFromNode($data);
+                        $customer->setFromNode($data, $args['id_store']);
+                        // Create order
+                        $payment_status = '';
+                        if(!$this->_config->get('orders/processing_fee')) {
+                            $data->order_amount = new SimpleXMLElement('<order_amount><![CDATA[' . ((float) $data->order_amount - (float) $data->order_processing_fee) . ']]></order_amount>');
+                            $data->order_processing_fee = new SimpleXMLElement('<order_processing_fee><![CDATA[ ]]></order_processing_fee>');
+                            $this->_helper->log('Order ' . $lengow_order_id . ' : rewrite amount without processing fee');
+                        }
                         // Create quote
                         if(!$quote = $order->createQuote($data, $customer)) {
                             $this->_helper->log('Order ' . $lengow_order_id . ' : create order fail');
                             continue;
                         }
-                        // Create order
-                        $order = $order->makeOrder($data, $quote);
+                        $order = $order->makeOrder($data, $quote, $_to_order);
                         if($order) {
                             // Change order date
                             if($this->_config->get('orders/date_import')) {
@@ -184,19 +216,24 @@ class Lengow_Sync_Model_Import extends Varien_Object {
                             }
                             $count_orders_added++;                        
                             $this->_helper->log('Order ' . $lengow_order_id . ' : import success (' . $order->getId() . ')');
+                            if($lengow_order->order_status->lengow == 'shipped') {
+                                $id_flux = (integer) $lengow_order->idFlux;
+                                $model_order = Mage::getModel('sync/order', $args['id_store']);
+                                $order_imported = $model_order->getOrderByIdLengow($lengow_order_id, $id_flux);
+                                $model_order->toShip($order, 
+                                                (string) $lengow_order->tracking_informations->tracking_carrier, 
+                                                (string) $lengow_order->tracking_informations->tracking_method, 
+                                                (string) $lengow_order->tracking_informations->tracking_number);
+                                $this->_helper->log('Order ' . $lengow_order_id . ' : update state to shipped');
+                            }
+                            // Clear session
+                            Mage::getSingleton('checkout/session')->clear();
                         }
-                        // Clear session
-                        Mage::getSingleton('checkout/session')->clear();
-                    ////*} catch(Exception $e) {
-                        //$this->_helper->log($e->getMessage(),$orderLw['IdOrder']);
-                        //Erase session for the next order
-                        //$this->getSession()->clear();                        
-                    //}*////
                 } else {
                     if($id_order_magento) {
                         $this->_helper->log('Order ' . $lengow_order_id . ' : already imported in Magento with order ID ' . $id_order_magento);
                     } else {
-                        $this->_helper->log('Order ' . $lengow_order_id . ' : order\'s status not available to import');
+                        $this->_helper->log('Order ' . $lengow_order_id . ' : order\'s status ( ' . $lengow_order_state . ') not available to import');
                     }
                 }
             }

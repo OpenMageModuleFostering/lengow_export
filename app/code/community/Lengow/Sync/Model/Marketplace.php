@@ -41,7 +41,10 @@ class Lengow_Sync_Model_Marketplace {
     public $states_lengow = array();
     public $states = array();
     public $actions = array();
+    public $payments = array();
+    public $payments_lengow = array();
     protected $_config;
+    const MARKETPLACE_STATUS_NO_MATCH = -1;
 
 
     /**
@@ -57,6 +60,7 @@ class Lengow_Sync_Model_Marketplace {
         if(!empty($object)) {
             $this->object = $object[0];
             $this->api_url = (string) $this->object->api;
+            // States
             foreach($this->object->states->state as $state) {
                 $this->states_lengow[(string) $state['name']] = (string) $state->lengow;
                 $this->states[(string) $state->lengow] = (string) $state['name'];
@@ -77,6 +81,13 @@ class Lengow_Sync_Model_Marketplace {
                           }
                         }
                     }
+                }
+            }
+            // Payment
+            if(count($this->object->payments)) {
+                foreach($this->object->payments->payment as $payment) {
+                    $this->payment_lengow[(string) $payment['name']] = (string) $payment->lengow;
+                    $this->payment[(string) $payment->lengow] = (string) $payment['name'];
                 }
             }
             $this->is_loaded = true;
@@ -100,7 +111,7 @@ class Lengow_Sync_Model_Marketplace {
       * @return string The lengow state
       */
     public function getStateLengow($name) {
-        return $this->states_lengow[$name];
+        return array_key_exists($name, $this->states_lengow) ? $this->states_lengow[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
     }
 
     /**
@@ -111,7 +122,29 @@ class Lengow_Sync_Model_Marketplace {
       * @return string The marketplace state
       */
     public function getState($name) {
-        return $this->states[$name];
+        return array_key_exists($name, $this->states) ? $this->states[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
+    }
+
+    /**
+      * Get the real lengow's payment 
+      *
+      * @param string $name The payment state
+      *
+      * @return string The lengow payment state
+      */
+    public function getStatePaymentLengow($name) {
+        return array_key_exists($name, $this->payments_lengow) ? $this->payments_lengow[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
+    }
+
+    /**
+      * Get the marketplace's payment 
+      *
+      * @param string $name The lengow payment
+      *
+      * @return string The marketplace payment
+      */
+    public function getStatePayment($name) {
+        return array_key_exists($name, $this->payments) ? $this->payments[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
     }
 
     /**
@@ -177,7 +210,7 @@ class Lengow_Sync_Model_Marketplace {
                                 if(!empty($trackings)) {
                                     $first_track = $trackings[0];
                                     $gets[$param['name']] = array(
-                                                'value' => $this->_matchCarrier($param, $first_track->getCarrierCode()),
+                                                'value' => $this->_matchCarrier($param, $first_track->getCarrierCode(), $first_track->getTitle()),
                                                 'require' => (array_key_exists('require', $param) ? explode(' ', $param['require']) : array())
                                               );
                                 }
@@ -262,10 +295,10 @@ class Lengow_Sync_Model_Marketplace {
       *
       * @return string The matching carrier name
       */
-    private function _matchCarrier($param, $name) {
+    private function _matchCarrier($param, $name, $title) {
         // No match
         if(!isset($param['accepted_values']))
-            return $name;
+            return $title;
         // Exact match
         foreach($param['accepted_values'] as $value) {
             $value = (string) $value;

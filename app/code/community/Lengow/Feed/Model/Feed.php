@@ -55,6 +55,12 @@ class Lengow_Feed_Model_Feed extends Varien_Object {
      */
     protected $_url;
     
+    /**
+     * 
+     * @var integer ID store
+     */
+    protected $_id_store;
+    
     protected $_idClient;
     protected $_idGroup;
     protected $_api_key;
@@ -82,7 +88,9 @@ class Lengow_Feed_Model_Feed extends Varien_Object {
         $this->_config_model = Mage::getSingleton('feed/config');
         
         $this->_idClient = $this->_config_model->get('tracker/general/login');
-        $this->_idGroup = $this->_config_model->get('tracker/general/group');
+        $this->_idGroup = $args['group_id'];
+        $this->_id_store = $args['store_id'];
+        //$this->_config_model->get('tracker/general/group');
         $this->_api_key = $this->_config_model->get('tracker/general/api_key');
         parent::__construct();
     }
@@ -97,7 +105,8 @@ class Lengow_Feed_Model_Feed extends Varien_Object {
         $params .= '/product_status/' . $this->_product_status;
         //$params .= '/product_child/' . $this->_product_child;
         $params .= '/format/' . $this->_format;
-        $params .= '/store/' . Mage::app()->getStore()->getId();
+        if($this->_id_store != 0)
+            $params .= '/store/' . $this->_id_store;
 
         $new_flow = Mage::getUrl('lengow/feed/index') . $params;
         $this->_url = $new_flow;
@@ -115,7 +124,13 @@ class Lengow_Feed_Model_Feed extends Varien_Object {
             'urlFlux' => $this->_url,
             'idFlux' => $this->_id
         );
+        Mage::helper('sync/data')->log('Test udate group ' . $this->_idGroup . ' : ' . $this->_url);
+        return true;
         return $connector->api('updateRootFeed', $args);
+    }
+
+    private function _cleanGroup($data) {
+        return trim(str_replace(array("\r\n", ';', '-', '|', ' '), ';', $data), ',');
     }
 
 }

@@ -50,24 +50,87 @@ class Lengow_Sync_Adminhtml_Lengow_OrderController extends Mage_Adminhtml_Contro
     }
     
     public function importAction() {
-        try {
-            $days = Mage::getModel('sync/config')->setStore(Mage::app()->getStore()->getId())
-                                                 ->getConfig('sync/orders/period');
-            $date_from = date('Y-m-d', strtotime(date('Y-m-d') . '-' . $days . 'days'));
-            $date_to = date('Y-m-d');
+        //if(!Mage::getSingleton('sync/config')->importCanStart()) {
+        //    Mage::helper('sync/data')->log('##Error manuel import : import is already started##');
+        //    $this->_getSession()->addError(Mage::helper('sync')->__('Import is already started'));
+        //    $this->_redirect('*/*/index');
+        //} else {
+            Mage::helper('sync/data')->log('##Start manual import##');
+            $_force_update = $this->getRequest()->getParam('update');
+            $_default_store = Mage::getModel('core/store')->load(Mage::app()
+                                                                     ->getWebsite(true)
+                                                                     ->getDefaultGroup()
+                                                                     ->getDefaultStoreId());
+            $_current_id_store = $_default_store->getId();
+            $_lengow_id_user_global = Mage::getModel('sync/config')->setStore($_current_id_store)->getConfig('tracker/general/login');
+            $_lengow_id_group_global = $this->_cleanGroup(Mage::getModel('sync/config')->setStore($_current_id_store)->getConfig('tracker/general/group'));
+            $result_new = 0;
+            $result_update = 0;
+            $result_new = 0;
+            $_default_is_imported = false;
             $import = Mage::getModel('sync/import');
-            $result = $import->exec('orders', array('dateFrom' => $date_from,
-                                                    'dateTo' => $date_to)); 
-            if($result['new'] > 0)
+            $import->setForceUpdate($_force_update);
+            // Import default shop if configured
+            if($_lengow_id_user_global && $_lengow_id_group_global) {
+                try {
+                    $_default_is_imported = true;
+                    Mage::helper('sync/data')->log('Start manual import in store ' . $_default_store->getName() . '(' . $_default_store->getId() . ')');
+                    $days = Mage::getModel('sync/config')->setStore($_default_store->getId())
+                                                         ->getConfig('sync/orders/period');     
+                    $date_from = date('Y-m-d', strtotime(date('Y-m-d') . '-' . $days . 'days'));
+                    $date_to = date('Y-m-d');
+                    $result = $import->exec('orders', array('dateFrom' => $date_from,
+                                                            'dateTo' => $date_to,
+                                                            'id_store' => $_current_id_store)); 
+                    $result_new = $result['new'];
+                    $result_update = $result['update'];
+                } catch(Exception $e) {
+                    $this->_getSession()->addError($e->getMessage());
+                    Mage::helper('sync/data')->log('Error ' . $e->getMessage() . '');
+                } 
+            }
+            $store_collection = Mage::getResourceModel('core/store_collection')
+                                    ->addFieldToFilter('is_active', 1);
+            // Import different view if is different
+            foreach($store_collection as $store) {
+                try {
+                    $_lengow_id_user_current = Mage::getModel('sync/config')->setStore($store->getId())->getConfig('tracker/general/login');
+                    $_lengow_id_group_current = $this->_cleanGroup(Mage::getModel('sync/config')->setStore($store->getId())->getConfig('tracker/general/group'));
+                    if(($_lengow_id_user_current != $_lengow_id_user_global || $_lengow_id_group_current != $_lengow_id_group_global)
+                       && $_lengow_id_user_current && $_lengow_id_group_current) {
+                        if($store->getId() != $_current_id_store || !$_default_is_imported) {
+                            Mage::helper('sync/data')->log('Start manual import in store ' . $store->getName() . '(' . $store->getId() . ')');
+                            $days = Mage::getModel('sync/config')->setStore($store->getId())
+                                                                 ->getConfig('sync/orders/period');
+                            $date_from = date('Y-m-d', strtotime(date('Y-m-d') . '-' . $days . 'days'));
+                            $date_to = date('Y-m-d');
+                            $import = Mage::getModel('sync/import');
+                            $import->setForceUpdate($_force_update);
+                            $result = $import->exec('orders', array('dateFrom' => $date_from,
+                                                                    'dateTo' => $date_to,
+                                                                    'id_store' => $store->getId())); 
+                            $result_new += $result['new'];
+                            $result_update += $result['update'];
+                        }
+                    }
+                } catch(Exception $e) {
+                    $this->_getSession()->addError($e->getMessage());
+                    Mage::helper('sync/data')->log('Error ' . $e->getMessage() . '');
+                } 
+            }      
+            if($result_new > 0)
                 $this->_getSession()->addSuccess(Mage::helper('sync')->__('%d orders are imported', $result['new']));
-            if($result['update'] > 0)
+            if($result_update > 0)
                 $this->_getSession()->addSuccess(Mage::helper('sync')->__('%d orders are updated', $result['update']));
-            if($result['new'] == 0 && $result['update'] == 0)
+            if($result_new == 0 && $result_update == 0)
                 $this->_getSession()->addSuccess(Mage::helper('sync')->__('No order available to import'));
-        } catch(Exception $e) {
-            $this->_getSession()->addError($e->getMessage());
-        }       
-        $this->_redirect("*/*/index");
+            Mage::helper('sync/data')->log('##End manual import##');
+            $this->_redirect('*/*/index');
+        //}
+    }
+
+    private function _cleanGroup($data) {
+        return trim(str_replace(array("\r\n", ';', '-', '|', ' '), ';', $data), ',');
     }
     
 }

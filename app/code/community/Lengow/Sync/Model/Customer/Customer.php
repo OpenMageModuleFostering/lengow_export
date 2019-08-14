@@ -15,17 +15,20 @@ class Lengow_Sync_Model_Customer_Customer extends Mage_Customer_Model_Customer {
      *
      * @param   $xml_node SimpleXMLElement
      */
-    public function setFromNode(SimpleXMLElement $xml_node) {
+    public function setFromNode(SimpleXMLElement $xml_node, $id_store) {
+        $id_store = Mage::getModel('core/store')->load($id_store)->getWebsiteId();
         $array = Mage::helper('sync')->xmlToAssoc($xml_node);
         if(empty($array['billing_address']['billing_email']))
             $array['billing_address']['billing_email'] = 'no-mail-' . $array['order_id'] . '@' . $array['marketplace'] . '.com';
         if(empty($array['billing_address']['billing_firstname']))
             $array['billing_address']['billing_firstname'] = '__';
-        $this->setWebsiteId(Mage::app()->getDefaultStoreView()->getWebsiteId())
+        if(empty($array['delivery_address']['delivery_firstname']))
+            $array['delivery_address']['delivery_firstname'] = '__';
+        $this->setWebsiteId($id_store)
              ->loadByEmail($array['billing_address']['billing_email']);    
         if(!$this->getId()) {
             $this->setImportMode(true);        
-            $this->setWebsiteId(Mage::app()->getDefaultStoreView()->getWebsiteId());
+            $this->setWebsiteId($id_store);
             $this->setConfirmation(null);
             $this->setForceConfirmed(true);
             $this->setPasswordHash($this->hashPassword($this->generatePassword(8)));
@@ -58,11 +61,16 @@ class Lengow_Sync_Model_Customer_Customer extends Mage_Customer_Model_Customer {
             $address->setIsDefaultShipping(true);
         }
         Mage::helper('core')->copyFieldset('lengow_convert_' . $type . '_address', 'to_' . $type . '_address', $data, $address);     
-        // Fix address 2 
         if($type == 'shipping')
             $type = 'delivery';
         $address_1 = $data[$type . '_address'];
         $address_2 = $data[$type . '_address_2'];
+        // Fix address 1
+        if(empty($address_1) && !empty($address_2)) {
+            $address_1 = $address_2;
+            $address_2 = null;
+        }
+        // Fix address 2 
         if(!empty($address_2))
             $address_1 = $address_1 . "\n" . $address_2;
         $address_3 = $data[$type . '_address_complement'];

@@ -134,6 +134,9 @@
             <state name="CLOSED">
                 <lengow>shipped</lengow>
             </state>
+            <state name="CANCELLED">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="shipped">
@@ -154,7 +157,7 @@
                     <value>GLS</value>
                     <value>DHL</value>
                     <value>Courrier Suivi</value>
-                </accepted_values> 
+                </accepted_values>
             </param>
         </additional_params>
     </marketplace>
@@ -202,11 +205,11 @@
             </state>
         </states>
         <additional_params>
-            <param usedby="shipped">
+            <param usedby="shipped" require="carrier">
                 <type>tracking</type>
                 <name>colis_idTracking</name>
             </param>
-            <param usedby="shipped">
+            <param usedby="shipped" require="tracking">
                 <type>carrier</type>
                 <name>transporteur</name>
             </param>
@@ -218,6 +221,9 @@
             <state name="New">
                 <lengow>new</lengow>
             </state>
+            <state name="new">
+                <lengow>new</lengow>
+            </state>
             <state name="ToShip">
                 <actions>
                     <action type="shipped">shippedOrder</action>
@@ -227,7 +233,36 @@
             <state name="Shipped">
                 <lengow>shipped</lengow>
             </state>
+            <state name="Completed">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="Cancelled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
+        <payments>         
+            <payment name="NoPaymentFailure">
+                <lengow>complete</lengow>
+            </payment>
+            <payment name="PayPalPaymentInProcess"> 
+                <lengow>pending</lengow>
+            </payment>
+            <payment name="PayPalPaymentInProcess"> 
+                <lengow>pending</lengow>
+            </payment>
+            <payment name="MoneyXferAcceptedInCheckout">
+                <lengow>pending</lengow>
+            </payment>
+            <payment name="Complete"> 
+                <lengow>complete</lengow>
+            </payment>
+            <payment name="Incomplete"> 
+                <lengow>pending</lengow>
+            </payment>
+            <payment name="PaymentInProcess"> 
+                <lengow>pending</lengow>
+            </payment> 
+        </payments>
         <additional_params>
             <param usedby="shipped">
                 <type>tracking</type>
@@ -238,7 +273,7 @@
     <marketplace name="cdiscount">
         <api>https://wsdl.lengow.com/wsdl/cdiscount/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <states>
-            <state name="WaintingForSellerAcceptation">
+            <state name="WaitingForSellerAcceptation">
                 <actions>
                     <action type="accept">acceptOrder</action>
                     <action type="refuse">refuseOrder</action>
@@ -282,23 +317,32 @@
             <state name="AutomaticCancellation">
                 <lengow>canceled</lengow>
             </state>
+            <state name="CancelledBeforePaymentByCustomer">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CancelledBeforeNotificationByCustomer">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CancellationRequestPending">
+                <lengow>canceled</lengow>
+            </state>
             <state name="RefusedBySeller">
                 <lengow>canceled</lengow>
             </state>
             <state name="PickedUp">
                 <lengow>shipped</lengow>
-            </state>            
+            </state>
         </states>
         <additional_params>
-            <param usedby="shipped">
+            <param usedby="shipped" require="carrier">
                 <type>tracking</type>
                 <name>TrackingColis</name>
             </param>
-            <param usedby="shipped">
+            <param usedby="shipped" require="tracking">
                 <type>carrier</type>
                 <name>Transporteur</name>
                 <accepted_values>
-                    <value label="La Poste">LAPOSTE</value>
+                    <value label="La Poste" default="true">LAPOSTE</value>
                     <value label="DHL">DHL</value>
                     <value label="Fedex">FEDEX</value>
                     <value label="GLS">GLS</value>
@@ -529,7 +573,7 @@
         <states>
             <state name="new">
                 <lengow>new</lengow>
-            </state>            
+            </state>
             <state name="processing">
                 <actions>
                     <action type="refuse">refuseOrder</action>
@@ -576,7 +620,7 @@
     <marketplace name="pixplace">
         <states>
             <state name="accepted">
-                <lengow>shipped</lengow>
+                <lengow>processing</lengow>
             </state>
             <state name="processing">
                 <lengow>processing</lengow>
@@ -638,7 +682,7 @@
                 <name>TrackingColis</name>
             </param>
         </additional_params>
-    </marketplace>    
+    </marketplace>
     <marketplace name="leoo">
         <states>
             <state name="Confirmé">
@@ -682,7 +726,7 @@
                 <name>Transporteur</name>
             </param>
         </additional_params>
-    </marketplace>    
+    </marketplace>
     <marketplace name="ecopresto">
         <api>https://wsdl.lengow.com/wsdl/ecopresto/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <states>
@@ -691,7 +735,7 @@
             </state>
             <state name="processing">
                 <actions>
-                    <action type="shipped">shipped</action>
+                    <action type="shipped">setTracking</action>
                 </actions>
                 <lengow>processing</lengow>
             </state>
@@ -717,7 +761,7 @@
                  </accepted_values>
             </param>
         </additional_params>
-    </marketplace>       
+    </marketplace>
     <marketplace name="ecitizen">
         <states>
             <state name="processing">
@@ -728,7 +772,7 @@
             </state>
         </states>
     </marketplace>
-    <marketplace name="godsavethekid">    
+    <marketplace name="godsavethekids">
         <states>
             <state name="RECEIVED">
                 <lengow>new</lengow>
@@ -767,5 +811,213 @@
                 <lengow>canceled</lengow>
             </state>
         </states>
+    </marketplace>
+    <marketplace name="mistergooddeal">
+        <api>https://wsdl.lengow.com/wsdl/mistergooddeal/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="RECEIVED">
+                <lengow>new</lengow>
+            </state>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+    </marketplace>
+    <marketplace name="rakuten_de">
+       <api>https://wsdl.lengow.com/wsdl/rakutende/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="pending">
+                <lengow>new</lengow>
+            </state>
+            <state name="editable">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="payout">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="cancelled">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+    </marketplace>
+    <marketplace name="spartoo">
+       <api>https://wsdl.lengow.com/wsdl/spartoo/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+       <states>
+           <state name="0">
+               <lengow>new</lengow>
+           </state>
+           <state name="1">
+               <actions>
+                   <action type="accept">processing</action>
+                   <action type="cancel">canceled</action>
+                   <action type="refund">refund</action>
+               </actions>
+               <lengow>new</lengow>
+           </state>
+           <state name="11">
+               <lengow>new</lengow>
+               <actions>
+                   <action type="accept">processing</action>
+                   <action type="cancel">canceled</action>
+                   <action type="refund">refund</action>
+               </actions>
+           </state>
+           <state name="2">
+               <actions>
+                   <action type="shipped" method="post">shipped</action>
+                   <action type="cancel">canceled</action>
+                   <action type="refund">refund</action>
+               </actions>
+               <lengow>processing</lengow>
+           </state>
+           <state name="3">
+               <lengow>shipped</lengow>
+           </state>
+           <state name="4">
+               <lengow>canceled</lengow>
+           </state>
+           <state name="41">
+               <lengow>canceled</lengow>
+           </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="zalando">
+       <api>http://wsdl.lengow.com/wsdl/zalando/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+       <states>
+           <state name="New">
+               <lengow>new</lengow>
+           </state>
+           <state name="Approved">
+               <actions>
+                   <action type="shipped" method="post">SHIPPED</action>
+                   <action type="cancel" method="post">ZALANDO_CANCELED</action>
+                   <action type="refund" method="post">NO_INVENTORY_CANCELED</action>
+               </actions>
+               <lengow>processing</lengow>
+           </state>
+           <state name="Shipped">
+               <actions>
+                   <action type="returned" method="post">RETURNED</action>
+               </actions>
+               <lengow>shipped</lengow>
+           </state>
+           <state name="Returned">
+               <lengow>canceled</lengow>
+           </state>
+           <state name="canceled">
+               <lengow>canceled</lengow>
+           </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped cancel refund returned">
+                <type>client_token</type>
+                <name>token</name>
+            </param>
+            <param usedby="shipped cancel refund returned">
+                <type>action</type>
+                <name>action</name>
+            </param>
+            <param usedby="shipped cancel refund returned">
+                <type>sku</type>
+                <name>sku</name>
+            </param>
+            <param usedby="shipped cancel refund returned">
+                <type>quantity</type>
+                <name>quantity</name>
+            </param>
+            <param usedby="shipped cancel refund returned">
+                <type>line</type>
+                <name>line</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>trackingNumber</name>
+            </param>
+            <param usedby="shipped">
+                <type>return_tracking</type>
+                <name>returnTrackingNumber</name>
+            </param>
+            <param usedby="returned">
+                <type>return_code</type>
+                <name>returnReasonCode</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="placedumariage">
+       <states>
+           <state name="partielle">
+               <lengow>new</lengow>
+           </state>
+           <state name="complète">
+               <lengow>new</lengow>
+           </state>
+           <state name="expédiée">
+               <lengow>shipped</lengow>
+           </state>
+           <state name="annulée">
+               <lengow>canceled</lengow>
+           </state>
+       </states>
     </marketplace>
 </marketplaces>

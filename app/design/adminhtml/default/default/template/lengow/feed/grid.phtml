@@ -21,8 +21,14 @@
 <?php if (!$this->isSingleStoreMode()): ?>
     <?php echo $this->getChildHtml('store_switcher'); ?>
 <?php endif; ?>
+<?php 
+$_store_id = $this->getRequest()->getParam('store');
+$args = array();
+if(!empty($_store_id))
+    $args['store'] = $_store_id;
+?>
 <div>
-    <form method="post" id="form_grid_feed" action="<?php echo $this->getUrl('*/*/migrate', array('' => '')); ?>">
+    <form method="post" id="form_grid_feed" action="<?php echo $this->getUrl('*/*/migrate', $args); ?>">
         <input name="form_key" type="hidden" value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
         <?php echo $this->getGridHtml() ?>
     </form>

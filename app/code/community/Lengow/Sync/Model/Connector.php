@@ -48,6 +48,7 @@ class Lengow_Sync_Model_Connector {
      * Default options for curl.
      */
     public static $CURL_OPTS = array(
+        //CURLOPT_SSL_VERIFYPEER => false, // Unquote if you want desactivate ssl check
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 300,

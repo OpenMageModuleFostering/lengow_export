@@ -27,6 +27,9 @@ class Lengow_Export_Helper_Security extends Mage_Core_Helper_Abstract {
         '95.131.141.169' ,
         '95.131.141.170' ,
         '95.131.141.171' ,
+        '82.127.207.67' ,
+        '80.14.226.127' ,
+        '80.236.15.223' ,
     ); 
 
     /**

@@ -17,7 +17,7 @@ class Lengow_Export_Model_Observer {
         foreach($store_collection as $store) {
             try {
                 if(Mage::getStoreConfig('export/performances/active_cron', $store)) {
-                    $generate = Mage::getSingleton('export/generate');
+                    $generate = Mage::getModel('export/generate');
                     $format =Mage::getStoreConfig('export/data/format', $store);
                     $generate->exec($store->getId(), null, $format, null, null, null, null, null, false, false);
                 }

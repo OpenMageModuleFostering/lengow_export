@@ -76,7 +76,7 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
 
         // Order id - Lead / Payment / Confirmation
         if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
-            self::$_ID_ORDER = Mage::getSingleton('checkout/session')->getLastOrderId();
+            self::$_ID_ORDER = Mage::getSingleton('checkout/session')->getLastRealOrderId();
         }
 
         // Ids Products - Page / Listpage / Basket / Payment / Confirmation
@@ -139,7 +139,7 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
         return '';
     }
 
-    protected function _getCurrentProductsIds() {
+    protected function _getCurrentProductsIds($implode = true) {
         $config = Mage::getModel('tracker/config');
         $ids = array();
         $products = $this->_getProductCollection()->getData();
@@ -148,7 +148,7 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
                 $ids[] = $product[$config->get('tag/identifiant')];
             }
         }
-        return implode('|', $ids);
+        return $implode ? implode('|', $ids) : $ids;
     }
 
     /**
@@ -194,8 +194,22 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
                 $layer->setCurrentCategory($origCategory);
             }
         }
-
         return $this->_productCollection;
+    }
+
+    protected function _beforeToHtml() {
+        if(self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_LIST) {
+            $config = Mage::getModel('tracker/config');
+            $_list = $this->getLayout()->getBlock('product_list');
+            $_products = $_list->getLoadedProductCollection(); 
+            if($_products) {
+                foreach ($_products as $product) {
+                    $ids[] = $product[$config->get('tag/identifiant')];
+                }
+            }
+            $this->setData('ids_products', implode('|', $ids));
+        }
+        parent::_beforeToHtml();
     }
 
     /**

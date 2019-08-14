@@ -25,8 +25,13 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
             }
             $generate = Mage::getSingleton('export/generate');
             $generate->setCurrentStore(Mage::app()->getStore()->getId());
+            $_default_store = Mage::getModel('core/store')->load(Mage::app()
+                            ->getWebsite(true)
+                            ->getDefaultGroup()
+                            ->getDefaultStoreId());
+            $generate->setOriginalCurrency($_default_store->getCurrentCurrencyCode());
             $id_store = (integer) $this->getRequest()->getParam('store', Mage::app()->getStore()->getId());
-            Mage::app()->setCurrentStore($id_store);
+            Mage::app()->getStore()->setCurrentStore($id_store);
             $format = (string) $this->getRequest()->getParam('format', 'csv');
             $types = $this->getRequest()->getParam('product_type', null);
             $export_child = $this->getRequest()->getParam('export_child', null);
@@ -44,6 +49,9 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
                 Mage::app()->getTranslator()->setLocale($locale);
                 // translation now works
                 Mage::app()->getTranslator()->init('frontend', true);
+            }
+            if($currency = $this->getRequest()->getParam('currency', null)) {
+                $generate->setCurrentCurrencyCode($currency);
             }
             $generate->exec($id_store, $mode, $format, $types, $status, $export_child, $out_of_stock, $selected_products, $stream, $limit, $offset, $ids_product);
         } else {

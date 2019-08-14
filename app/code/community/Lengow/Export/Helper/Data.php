@@ -51,9 +51,10 @@ class Lengow_Export_Helper_Data extends Mage_Core_Helper_Abstract {
      *
      * @param string $value The content
      * @param boolean $convert If convert specials chars
+     * @param boolean $html Keep html
      * @return string $value
      */
-    public function cleanData($value, $convert = false) {
+    public function cleanData($value, $convert = false, $html = false) {
         if ($convert)
             $value = htmlentities($value);
         if(is_array($value))
@@ -69,8 +70,10 @@ class Lengow_Export_Helper_Data extends Mage_Core_Helper_Abstract {
         // Reject overly long 3 byte sequences and UTF-16 surrogates and replace with blank
         $value = preg_replace('/\xE0[\x80-\x9F][\x80-\xBF]' .
                 '|\xED[\xA0-\xBF][\x80-\xBF]/S', '', $value);
-        $pattern = '@<[\/\!]*?[^<>]*?>@si'; //nettoyage du code HTML
-        $value = preg_replace($pattern, ' ', $value);
+        if(!$html) {
+            $pattern = '@<[\/\!]*?[^<>]*?>@si'; //nettoyage du code HTML
+            $value = preg_replace($pattern, ' ', $value);
+        }
         $value = preg_replace('/[\s]+/', ' ', $value); //nettoyage des espaces multiples
         $value = trim($value);
         $value = str_replace('&nbsp;', ' ', $value);
@@ -89,7 +92,14 @@ class Lengow_Export_Helper_Data extends Mage_Core_Helper_Abstract {
         return $value;
     }
 
-    function _convert($content) {
+    public function convertHTML($html) {
+        $html = str_replace(array('"', "\r", "\n"), 
+                            array('"""', '', ''), 
+                            trim(nl2br($html)));
+        return $html;
+    } 
+
+    protected function _convert($content) {
         if (!mb_check_encoding($content, 'UTF-8') OR !($content === mb_convert_encoding(mb_convert_encoding($content, 'UTF-32', 'UTF-8'), 'UTF-8', 'UTF-32'))) {
             $content = mb_convert_encoding($content, 'UTF-8');
         }

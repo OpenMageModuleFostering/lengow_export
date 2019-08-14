@@ -112,11 +112,13 @@ class Lengow_Export_Model_Catalog_Product extends Mage_Catalog_Model_Product {
                     $productAttribute   = $attribute->getProductAttribute();
                     $productAttributeId = $productAttribute->getId();
                     $attributeValue     = $product_instance->getData($productAttribute->getAttributeCode());
-                    foreach($attribute->getPrices() as $priceChange) {
-                        if (is_array($price) && array_key_exists('value_index', $price) && $price['value_index'] == $attributeValue) {
-                            $configurableOldPrice += (float) ( $priceChange['is_percent'] ? ( ( (float) $priceChange['pricing_value'] ) * $price / 100 ) : $priceChange['pricing_value'] );
-                            $configurablePrice += (float) ( $priceChange['is_percent'] ? ( ( (float) $priceChange['pricing_value'] ) * $finalPrice / 100 ) : $priceChange['pricing_value'] );
-                        }
+                    if(count($attribute->getPrices()) > 0) {
+                        foreach($attribute->getPrices() as $priceChange) {
+                            if (is_array($price) && array_key_exists('value_index', $price) && $price['value_index'] == $attributeValue) {
+                                $configurableOldPrice += (float) ( $priceChange['is_percent'] ? ( ( (float) $priceChange['pricing_value'] ) * $price / 100 ) : $priceChange['pricing_value'] );
+                                $configurablePrice += (float) ( $priceChange['is_percent'] ? ( ( (float) $priceChange['pricing_value'] ) * $finalPrice / 100 ) : $priceChange['pricing_value'] );
+                            }
+                        } 
                     }
                 }
             }
@@ -135,6 +137,26 @@ class Lengow_Export_Model_Catalog_Product extends Mage_Catalog_Model_Product {
                 $product_instance->setTaxPercent(null),
                 $product_instance->getFinalPrice() + $configurablePrice
             );
+        } else if($product_instance->getTypeId() == 'grouped') {
+            $price = 0;
+            $final_price = 0;
+            $childs = Mage::getModel('catalog/product_type_grouped')->getChildrenIds($product_instance->getId());
+            $childs = $childs[Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED];
+            foreach ($childs as $value) {
+                $product = Mage::getModel('export/catalog_product')->load($value);
+                $price += $product->getPrice();
+                $final_price += $product->getFinalPrice();
+            }
+            $price_including_tax = Mage::helper('tax')->getPrice(
+                $product_instance->setTaxPercent(null),
+                $price,
+                true
+            );
+            $final_price_including_tax = Mage::helper('tax')->getPrice(
+                $product_instance->setTaxPercent(null),
+                $final_price,
+                true
+            );
         } else {
             $price_including_tax = Mage::helper('tax')->getPrice(
                 $product_instance->setTaxPercent(null),
@@ -145,9 +167,9 @@ class Lengow_Export_Model_Catalog_Product extends Mage_Catalog_Model_Product {
                 $product_instance->getFinalPrice()
             );
         }
-        $discount_amount = $price_including_tax - $final_price_including_tax;
-        $data['price-ttc'] = round($final_price_including_tax, 2);
-        $data['price-before-discount'] = round($price_including_tax, 2);
+        $discount_amount = Mage::helper('directory')->currencyConvert($price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()) - Mage::helper('directory')->currencyConvert($final_price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode());
+        $data['price-ttc'] = round(Mage::helper('directory')->currencyConvert($final_price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()), 2);
+        $data['price-before-discount'] = round(Mage::helper('directory')->currencyConvert($price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()), 2);
         $data['discount-amount'] = $discount_amount > 0 ? round($discount_amount, 2) : '0';
         $data['discount-percent'] = $discount_amount > 0 ? round(($discount_amount * 100) / $price_including_tax, 0) : '0';
         $data['start-date-discount'] = $product_instance->getSpecialFromDate;
@@ -206,7 +228,8 @@ class Lengow_Export_Model_Catalog_Product extends Mage_Catalog_Model_Product {
                 }
                 $i++;
             }
-            $c->clearInstance();
+            if(method_exists($c, 'clearInstance'))
+                $c->clearInstance();
         }
         $data['category-breadcrumb'] = implode(' > ', $ariane);
         unset($categories, $category, $ariane);

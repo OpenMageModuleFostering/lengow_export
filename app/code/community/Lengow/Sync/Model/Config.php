@@ -19,6 +19,8 @@ class Lengow_Sync_Model_Config extends Varien_Object {
     
     protected $_id_store;
 
+    protected $_file;
+
     public static $ADDRESS_ATTRIBUTES = array(
                             'prefix' => 'na',
                             'firstname' => 'firstname',
@@ -99,6 +101,76 @@ class Lengow_Sync_Model_Config extends Varien_Object {
             fclose($handle);
             Mage::getModel('core/config')->saveConfig('sync/hidden/last_synchro', date('Y-m-d'));
         }
+    }
+
+    /**
+     * Check if import can be started
+     *
+     * @return boolean.
+     */
+    public function importCanStart() {
+        $timestamp = $this->readFlagFile();
+        if($timestamp !== false) {
+            $this->createFlagFile();
+            return true;
+        }
+        if((time() - (integer) $timestamp) < (60*25)) {
+            return false;
+        } else {
+            $this->createFlagFile();
+            return true;
+        }
+    }
+
+    /**
+     * Create file flag.
+     *
+     * @return boolean.
+     */
+    public  function readFlagFile() {
+        $file_path = Mage::getBaseDir('media') . DS . 'lengow' . DS;
+        if(is_file($file_path . 'import.flag')) {
+            $this->_file = Mage::getModel('sync/file');
+            $this->_file->checkAndCreateFolder($file_path);
+            $this->_file->cd($file_path);
+            $this->_file->streamOpen('import.flag', 'r+');
+            $this->_file->streamLock();
+            return $this->_file->streamRead(4096);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Create file flag.
+     *
+     * @return boolean.
+     */
+    public  function createFlagFile($clean = false) {
+        if($clean)
+            $_time = 0;
+        else
+            $_time = time();
+        $file_path = Mage::getBaseDir('media') . DS . 'lengow' . DS;
+        $this->_file->streamUnlock();
+        $this->_file->streamClose();
+        $this->_file->streamOpen('import.flag', 'w+');
+        $this->_file->streamLock();
+        $this->_file->streamWrite($_time);
+        Mage::helper('sync/data')->log('Write on file log : ' . $_time);
+    }
+
+    /**
+     * Clean file flag.
+     *
+     * @return boolean.
+     */
+    public  function cleanFlagFile() {
+        $file_path = Mage::getBaseDir('media') . DS . 'lengow' . DS;
+        if(is_file($file_path . 'import.flag'))
+            $this->createFlagFile(true);
+            $this->_file->streamUnlock();
+            $this->_file->streamClose();
     }
     
 }

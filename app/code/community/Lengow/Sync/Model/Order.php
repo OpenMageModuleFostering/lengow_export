@@ -5,43 +5,53 @@
  * @category    Lengow
  * @package     Lengow_Sync
  * @author      Ludovic Drin <ludovic@lengow.com>
- * @copyright   2013 Lengow SAS 
+ * @copyright   2013 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
-    
+
     protected $_countryCollection;
     protected $_config;
-    
+
     protected $_canInvoice = false;
     protected $_canShip = false;
     protected $_canCancel = false;
     protected $_canRefund = false;
-    
+
     protected $_hasInvoices = false;
     protected $_hasShipments = false;
     protected $_isCanceled = false;
     protected $_isRefunded = false;
-    
-    public function isAlreadyImported($id_lengow, $id_flux) {
+
+    private $_store;
+
+    public function __construct($id_store) {
+        $this->_store = Mage::getModel('core/store')->load($id_store);
+        parent::__construct();
+    }
+
+     public function isAlreadyImported($id_lengow, $id_flux) {
         $order = Mage::getModel('sales/order')->getCollection()
                                               ->addAttributeToFilter('order_id_lengow', $id_lengow)
-                                              ->addAttributeToSelect('order_id_lengow');
+                                              ->addAttributeToFilter('feed_id_lengow', $id_flux)
+                                              ->addAttributeToSelect('order_id_lengow')
+                                              ->getData();;
         if(count($order) > 0)
             return true;
         else
             return false;
     }
-    
+
     public function getOrderByIdLengow($id_lengow, $id_flux) {
         $order = Mage::getModel('sales/order')->getCollection()
                                               ->addAttributeToFilter('order_id_lengow', $id_lengow)
+                                              ->addAttributeToFilter('feed_id_lengow', $id_flux)
                                               ->addAttributeToSelect('entity_id')
                                               ->getData();
-        if(count($order))
-            return Mage::getModel('sync/order')->load($order[0]);
+        if(isset($order[0]['entity_id']))
+            return Mage::getModel('sales/order')->load($order[0]['entity_id']);
     }
-    
+
     /**
      * Retrieve config singleton
      *
@@ -53,23 +63,23 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
         }
         return $this->_config;
     }
-    
+
     /**
      * Create quote
      *
      * @param Varien_Object $lengowItem
      */
     public function createQuote(SimpleXMLelement $data, Lengow_Sync_Model_Customer_Customer $customer) {
-        $quote = new Mage_Sales_Model_Quote();    
+        $quote = Mage::getModel('sales/quote');
         $quote->setIsMultiShipping(false)
               ->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER)
               ->setCustomerId($customer->getId())
               ->setCustomerEmail($customer->getEmail())
               ->setCustomerIsGuest(false)
-              ->setCustomerGroupId($this->getConfig()->get('customer_type'))
+              ->setCustomerGroupId($this->getConfig()->get('orders/customer_group'))
               ->setCustomerFirstname($customer->getFirstname())
               ->setCustomerLastname($customer->getLastname())
-              ->setStore(Mage::app()->getDefaultStoreView());
+              ->setStore($this->_store);
         // Add products to quote with data from Lengow
         foreach($data->cart->products->product as $lengow_product) {
             if(!$quote = $this->addItemToQuote($lengow_product, $quote, (string) $data->order_id)) {
@@ -78,7 +88,7 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
         }
         // Set billing Address
         $billing_address =  $quote->getBillingAddress();
-        $billing_address->setShouldIgnoreValidation(true); 
+        $billing_address->setShouldIgnoreValidation(true);
         $customer_billing_address = Mage::getModel('customer/address')->load($customer->getDefaultBilling());
         $billing_address->importCustomerAddress($customer_billing_address)->setSaveInAddressBook(0);
         // Set shipping Address
@@ -121,7 +131,7 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
         $quote->save();
         return $quote;
     }
-    
+
     /**
      * Add item to quote
      *
@@ -129,9 +139,9 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
      * @param Mage_Sales_Mode_Quote
      * @return Mage_Sales_Mode_Quote
      */
-    public function addItemToQuote(SimpleXMLelement $lengow_product, Mage_Sales_Model_Quote $quote, $order_id) {
+    public function addItemToQuote(SimpleXMLelement $lengow_product, $quote, $order_id) {
         // TODO add while
-        $quote->setIsSuperMode(true);       
+        $quote->setIsSuperMode(true);
         $product_model = Mage::getModel('catalog/product');
         $sku = (string) $lengow_product->sku;
         $sku = str_replace('\_', '_', $sku);
@@ -152,29 +162,29 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
             $product->load($collection[0]['entity_id']);
           }
         }
-        if(!$product->getId()) {
+        if(!empty($sku) && !$product->getId()) {
           $product = $product_model->load($product_model->getIdBySku($sku));
-          if(!$product->getId()) {
+          if(!empty($sku) && !$product->getId()) {
               $sku = (string) $lengow_product->idMP;
               $sku = str_replace('\_', '_', $sku);
               $product = $product_model->load($product_model->getIdBySku($sku));
-              if(!$product->getId()) {
+              if(!empty($sku) && !$product->getId()) {
                   $sku = (string) $lengow_product->idLengow;
                   $sku = str_replace('\_', '_', $sku);
                   $product = $product_model->load($product_model->getIdBySku($sku));
-                  if(!$product->getId()) { 
+                  if(!empty($sku) && !$product->getId()) {
                       $sku = (string) $lengow_product->sku;
                       $sku = str_replace('\_', '_', $sku);
                       $product = $product_model->load($sku);
-                      if(!$product->getId()) { 
+                      if(!empty($sku) && !$product->getId()) {
                           $sku = (string) $lengow_product->idMP;
                           $sku = str_replace('\_', '_', $sku);
                           $product = $product_model->load($sku);
-                          if(!$product->getId()) {
+                          if(!empty($sku) && !$product->getId()) {
                               $sku = (string) $lengow_product->idLengow;
                               $sku = str_replace('\_', '_', $sku);
                               $product = $product_model->load($sku);
-                              if(!$product->getId()) { 
+                              if(!empty($sku) && !$product->getId()) {
                                   Mage::helper('sync')->log('Order ' . $order_id . ' : Product ' . (string) $lengow_product->sku . ' doesn\'t exist');
                                   return false;
                               }
@@ -196,21 +206,21 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
         $title_from_lengow = $this->getConfig()->setStore($quote->getStore()->getStoreId())->get('orders/title');
         if($title_from_lengow)
             $quote_item->setName((string) $lengow_product->title);
-        $quote->addItem($quote_item);     
+        $quote->addItem($quote_item);
         return $quote;
     }
-    
+
     /**
      * Create order
-     * 
+     *
      * @param Mage_Sales_Model_Quote
-     * @return Mage_Sales_Model_Order 
+     * @return Mage_Sales_Model_Order
      */
-    public function makeOrder(SimpleXMLelement $data, Mage_Sales_Model_Quote $quote) {
-        try {    
-            $order = false;  
+    public function makeOrder(SimpleXMLelement $data, Mage_Sales_Model_Quote $quote, $invoice = true) {
+        try {
+            $order = false;
             $store = $quote->getStore();
-            $grand_total = 0;  
+            $grand_total = 0;
             if (!Mage::helper('tax')->priceIncludesTax($store)) {
                 $grand_total = $quote->getGrandTotal();
             }
@@ -226,20 +236,24 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
                                      'total_paid_lengow' => (float) $data->order_amount ,
                                      'carrier_lengow' => (string) $data->tracking_informations->tracking_carrier ,
                                      'carrier_method_lengow' => (string) $data->tracking_informations->tracking_method ,
+                                     'global_currency_code' => (string) $data->order_currency ,
+                                     'base_currency_code' => (string) $data->order_currency ,
+                                     'store_currency_code' => (string) $data->order_currency ,
+                                     'order_currency_code' => (string) $data->order_currency ,
                                     );
             $service = Mage::getModel('sales/service_quote', $quote);
             $service->setOrderData($additional_data);
             $order = false;
-            if(method_exists($service, 'submitAll')) {          
+            if(method_exists($service, 'submitAll')) {
                 $service->submitAll();
                 $order = $service->getOrder();
             } else {
                 $order = $service->submit();
             }
-            $order->setIsFromLengow(true)  
-                  ->save();      
+            $order->setIsFromLengow(true)
+                  ->save();
             // Re-ajuste cents
-            // Conversion Tax Include > Tax Exclude > Tax Include maybe make 0.01 amount error     
+            // Conversion Tax Include > Tax Exclude > Tax Include maybe make 0.01 amount error
             if (!Mage::helper('tax')->priceIncludesTax($store)) {
 
                 if($order->getBaseShippingInclTax() != (float) $data->order_shipping) {
@@ -253,10 +267,11 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
                 }
                 $order->save();
             }
-            $order = $this->toInvoice($order);
+            if($invoice)
+              $order = $this->toInvoice($order);
             // FIX fields amount & taxes
             $products = Mage::getResourceModel('sales/order_item_collection')
-                            ->setOrderFilter($order->getId()); 
+                            ->setOrderFilter($order->getId());
             foreach($products as $product) {
                 $product->setBaseOriginalPrice($product->getOriginalPrice());
                 $product->setBaseTaxAmount($product->getTaxAmount());
@@ -274,13 +289,13 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
             $order->save();
         } catch (Exception $e){
             Mage::helper('sync')->log('Error create order : ' . $e->getMessage());
-        } 
-        return $order;  
+        }
+        return $order;
     }
-    
+
     /**
      * Create invoice
-     * 
+     *
      * @param Mage_Sales_Model_Order
      * @return Lengow_Sync_Model_Order
      */
@@ -296,10 +311,10 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
                 $transactionSave->save();
                 $this->_hasInvoices = true;
             }
-        }        
+        }
         return $order;
     }
-    
+
     /**
      * Ship order
      *
@@ -307,7 +322,7 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
      * @return Lengow_Sync_Model_Order
      */
     public function toShip($order, $carrier = null, $title = '', $tracking = '') {
-        if($this->_canShip && $order->canShip()) {
+        if($order->canShip()) {
             $shipment = Mage::getModel('sales/service_order', $order)->prepareShipment();
             if($shipment) {
                 $shipment->register();
@@ -318,17 +333,30 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
                 $transactionSave->save();
                 $this->_hasShipments = true;
                 // Add tracking information
-                if($tracking)
-                    $ship = Mage::getModel('sales/order_shipment_api')
-                                ->addTrack($shipment->getIncrementId() , 
+                if($tracking) {
+                  $shipment = Mage::getModel('sales/order_shipment')->loadByIncrementId($shipment->getIncrementId());
+                  $track = Mage::getModel('sales/order_shipment_track')
+                               ->setNumber($tracking)
+                               ->setCarrierCode($carrier)
+                               ->setTitle($title);
+                  $shipment->addTrack($track);
+                }
+                try {
+                    $shipment->save();
+                    $track->save();
+                } catch (Mage_Core_Exception $e) {
+                    Mage::helper('sync')->log('Error create shipment : ' . $e->getMessage());
+                }
+                /*$ship = Mage::getModel('sales/order_shipment_api')
+                                ->addTrack($shipment->getIncrementId() ,
                                            $carrier ,
                                            $title ,
-                                           $tracking);   
+                                           $tracking); */
             }
-        }        
+        }
         return $this;
     }
-    
+
     /**
      * Cancel order
      *
@@ -340,10 +368,10 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
             $order->cancel();
             $this->_isCanceled = true;
         }
-    
+
         return $this;
     }
-    
+
     /**
      * Refund order
      *
@@ -352,17 +380,17 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
      */
     public function toRefund(Lengow_Sync_Model_Order $order) {
         if($this->_canRefund && $order->canCreditmemo()) {
-            $invoice_id = $order->getInvoiceCollection()->getFirstItem()->getId();            
+            $invoice_id = $order->getInvoiceCollection()->getFirstItem()->getId();
             if(!$invoice_id) {
-                return $this;            
-            }            
+                return $this;
+            }
             $invoice = Mage::getModel('sales/order_invoice')->load($invoice_id)->setOrder($order);
             $service = Mage::getModel('sales/service_order', $order);
-            $creditmemo = $service->prepareInvoiceCreditmemo($invoice);            
+            $creditmemo = $service->prepareInvoiceCreditmemo($invoice);
             $backToStock = array();
             foreach($order->getAllItems() as $item) {
                 $backToStock[$item->getId()] = true;
-            }            
+            }
             // Process back to stock flags
             foreach ($creditmemo->getAllItems() as $creditmemoItem) {
                 $orderItem = $creditmemoItem->getOrderItem();
@@ -372,8 +400,8 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
                 } else {
                     $creditmemoItem->setBackToStock(false);
                 }
-            }            
-            $creditmemo->register();            
+            }
+            $creditmemo->register();
             $transactionSave = Mage::getModel('core/resource_transaction')
                 ->addObject($creditmemo)
                 ->addObject($creditmemo->getOrder());
@@ -382,13 +410,13 @@ class Lengow_Sync_Model_Order extends Mage_Sales_Model_Order {
             }
             $transactionSave->save();
             $this->_isRefunded = true;
-        }    
+        }
         return $this;
     }
-    
+
     /**
      * Retrieve country id based on country name
-     * 
+     *
      *  @param string $country_name
      *  @return string
      */

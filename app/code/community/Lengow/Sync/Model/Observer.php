@@ -63,14 +63,13 @@ class Lengow_Sync_Model_Observer {
                         }
                         // check if group was already imported
                         $new_id_lengow_group = false;
-                        $id_groups = explode(';', $id_lengow_group);
+                        $id_groups = explode(',', $id_lengow_group);
                         foreach ($id_groups as $id_group) {
                             if (is_numeric($id_group) && !in_array($id_group, $lengow_groups)) {
                                 $lengow_groups[] = $id_group;
-                                $new_id_lengow_group .= !$new_id_lengow_group ? $id_group : ';'.$id_group;
+                                $new_id_lengow_group .= !$new_id_lengow_group ? $id_group : ','.$id_group;
                             }
                         }
-
                         if (!$error_import && $new_id_lengow_group) {
                             $days = $lensync_config->get('orders/period');
                             $args = array(
@@ -177,7 +176,7 @@ class Lengow_Sync_Model_Observer {
      */
     private function _cleanGroup($data)
     {
-        return trim(str_replace(array("\r\n", ';', '-', '|', ' '), ';', $data), ',');
+        return trim(str_replace(array("\r\n", ';', '-', '|', ' '), ',', $data), ',');
     }
 
 }

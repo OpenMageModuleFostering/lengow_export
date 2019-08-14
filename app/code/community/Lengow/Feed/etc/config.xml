@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Lengow_Feed>
-            <version>2.1.1</version>
+            <version>2.1.2</version>
         </Lengow_Feed>
     </modules>
     <admin>
@@ -99,9 +99,9 @@
                         </system>
                         <lengow translate="title" module="lenfeed">
                             <children>
-                                <lenfeed translate="title" module="lenfeed">
+                                <feed translate="title" module="lenfeed">
                                     <title>Manage Feeds</title>
-                                </lenfeed>
+                                </feed>
                             </children>
                         </lengow>
                     </children>

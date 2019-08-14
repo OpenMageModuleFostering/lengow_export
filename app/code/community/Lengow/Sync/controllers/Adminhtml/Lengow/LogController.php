@@ -10,20 +10,23 @@
  */
 class Lengow_Sync_Adminhtml_Lengow_LogController extends Mage_Adminhtml_Controller_Action {
     
-    protected function _initAction() {
+    protected function _initAction()
+    {
         $this->loadLayout()
              ->_setActiveMenu('lengow/log')
              ->_addBreadcrumb(Mage::helper('lensync')->__('Lengow orders'), Mage::helper('lensync')->__('Lengow orders'));
         return $this;
     }
     
-    public function indexAction() {
+    public function indexAction()
+    {
         $this->_initAction()
              ->renderLayout();        
         return $this;
     }
     
-    public function deleteAction() {
+    public function deleteAction()
+    {
         $collection = Mage::getModel('lensync/log')->getCollection();
         foreach($collection as $log)
             $log->delete();            
@@ -32,9 +35,15 @@ class Lengow_Sync_Adminhtml_Lengow_LogController extends Mage_Adminhtml_Controll
             
     }
     
-    public function gridAction() {
+    public function gridAction()
+    {
         $this->getResponse()->setBody($this->getLayout()->createBlock('lensync/adminhtml_log_grid')->toHtml());        
         return $this;
+    }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('lengow/log');
     }
     
 }

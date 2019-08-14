@@ -125,11 +125,11 @@ class Lengow_Sync_Adminhtml_Lengow_OrderController extends Mage_Adminhtml_Contro
                     }
                     // check if group was already imported
                     $new_id_lengow_group = false;
-                    $id_groups = explode(';', $id_lengow_group);
+                    $id_groups = explode(',', $id_lengow_group);
                     foreach ($id_groups as $id_group) {
                         if (is_numeric($id_group) && !in_array($id_group, $lengow_groups)) {
                             $lengow_groups[] = $id_group;
-                            $new_id_lengow_group .= !$new_id_lengow_group ? $id_group : ';'.$id_group;
+                            $new_id_lengow_group .= !$new_id_lengow_group ? $id_group : ','.$id_group;
                         }
                     }
                     // start import for current store 
@@ -182,7 +182,12 @@ class Lengow_Sync_Adminhtml_Lengow_OrderController extends Mage_Adminhtml_Contro
      */
     private function _cleanGroup($data)
     {
-        return trim(str_replace(array("\r\n", ';', '-', '|', ' '), ';', $data), ';');
+        return trim(str_replace(array("\r\n", ';', '-', '|', ' '), ',', $data), ',');
+    }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('lengow/sync');
     }
 
 }

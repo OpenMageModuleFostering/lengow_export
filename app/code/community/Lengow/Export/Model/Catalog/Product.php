@@ -64,7 +64,7 @@ class Lengow_Export_Model_Catalog_Product extends Mage_Catalog_Model_Product {
      *  
      * @return mixed
      */
-    protected function _getShippingPrice($product_instance, $carrierValue, $countryCode = 'FR')
+    public function _getShippingPrice($product_instance, $carrierValue, $countryCode = 'FR')
     {
         $carrierTab = explode('_', $carrierValue);
         list($carrierCode, $methodCode) = $carrierTab;
@@ -132,12 +132,13 @@ class Lengow_Export_Model_Catalog_Product extends Mage_Catalog_Model_Product {
      *
      * @param Mage_Catalog_Model_Product    $product_instance
      * @param Mage_Catalog_Model_Product    $configurable_instance
+     * @param integer                       $id_store 
      * 
      * @return array
      */
-    public function getPrices($product_instance, $configurable_instance = null)
+    public function getPrices($product_instance, $configurable_instance = null, $id_store)
     {
-        $store = Mage::app()->getStore();
+        $store = Mage::app()->getStore($id_store);
         $config = Mage::helper('tax')->priceIncludesTax($store);
         $calculator = Mage::getSingleton('tax/calculation');
         $taxClassId = $product_instance->getTaxClassId();
@@ -206,9 +207,21 @@ class Lengow_Export_Model_Catalog_Product extends Mage_Catalog_Model_Product {
             $price_including_tax = $price;
             $final_price_including_tax = $final_price;
         }
-        $discount_amount = Mage::helper('directory')->currencyConvert($price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()) - Mage::helper('directory')->currencyConvert($final_price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode());
-        $data['price-ttc'] = round(Mage::helper('directory')->currencyConvert($final_price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()), 2);
-        $data['price-before-discount'] = round(Mage::helper('directory')->currencyConvert($price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()), 2);
+        // get currency for convert
+        if (!$this->getCurrentCurrencyCode())
+            $toCurrency = $store->getCurrentCurrency();
+        else
+            $toCurrency = Mage::getModel('directory/currency')->load($this->getCurrentCurrencyCode());
+        // get prices with or without convertion
+        if ($this->getOriginalCurrency() == $toCurrency->getCode()) {
+            $discount_amount = $price_including_tax - $final_price_including_tax;
+            $data['price-ttc'] = round($final_price_including_tax,2);
+            $data['price-before-discount'] = round($price_including_tax,2);
+        } else {
+            $discount_amount = Mage::helper('directory')->currencyConvert($price_including_tax, $this->getOriginalCurrency(), $toCurrency) - Mage::helper('directory')->currencyConvert($final_price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode());
+            $data['price-ttc'] = round(Mage::helper('directory')->currencyConvert($final_price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()), 2);
+            $data['price-before-discount'] = round(Mage::helper('directory')->currencyConvert($price_including_tax, $this->getOriginalCurrency(), $this->getCurrentCurrencyCode()), 2);
+        }
         $data['discount-amount'] = $discount_amount > 0 ? round($discount_amount, 2) : '0';
         $data['discount-percent'] = $discount_amount > 0 ? round(($discount_amount * 100) / $price_including_tax, 0) : '0';
         $data['start-date-discount'] = $product_instance->getSpecialFromDate();

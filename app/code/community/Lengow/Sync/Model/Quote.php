@@ -63,9 +63,10 @@ class Lengow_Sync_Model_Quote extends Mage_Sales_Model_Quote {
                     if (Mage::getStoreConfig('lensync/orders/title', $this->getStore()))
                         $product->setName((string) $product_line->title);
                     // add item to quote
-                    $quote_item = Mage::getModel('sales/quote_item')
+                    $quote_item = Mage::getModel('lensync/quote_item')
                                         ->setProduct($product)
-                                        ->setQty((int) $product_line->quantity);
+                                        ->setQty((int) $product_line->quantity)
+                                        ->setConvertedPrice($price);
                     $this->addItem($quote_item);
                 }
             }
@@ -93,6 +94,7 @@ class Lengow_Sync_Model_Quote extends Mage_Sales_Model_Quote {
         // search product foreach sku
         $i = 0;
         $found = false;
+        $product = false;
         $count = count($api_fields);
         while(!$found && $i < $count) {
             // search with sku type field first
@@ -115,7 +117,7 @@ class Lengow_Sync_Model_Quote extends Mage_Sales_Model_Quote {
             }
             // search by id or sku
             if (!$product || !$product->getId()) {
-                if (is_integer($sku) && $sku != 0) {
+                if (preg_match('/^[0-9]*$/',$sku)) {
                     $product = $product_model->load((integer) $sku);
                 } else {
                     $sku = str_replace('\_', '_', $sku);
@@ -126,9 +128,9 @@ class Lengow_Sync_Model_Quote extends Mage_Sales_Model_Quote {
                 $found = true;
         }
         if (!$found)
-            throw new Lengow_Sync_Model_Quote_Exception('product ' . (string) $lengow_product->sku . ' could not be found.');
+            throw new Exception('product ' . (string) $lengow_product->sku . ' could not be found.');
         elseif ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE)
-            throw new Lengow_Sync_Model_Quote_Exception('product ' . (string) $lengow_product->sku . ' is a parent product.');
+            throw new Exception('product ' . (string) $lengow_product->sku . ' is a parent product.');
         return $product;
     }
   

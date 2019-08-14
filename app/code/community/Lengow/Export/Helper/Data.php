@@ -76,19 +76,40 @@ class Lengow_Export_Helper_Data extends Mage_Core_Helper_Abstract {
         }
         $value = preg_replace('/[\s]+/', ' ', $value); //nettoyage des espaces multiples
         $value = trim($value);
-        $value = str_replace('&nbsp;', ' ', $value);
-        $value = str_replace('|', ' ', $value);
-        $value = str_replace('"', '\'', $value);
-        $value = str_replace('’', '\'', $value);
-        $value = str_replace('&#39;', ' ', $value);
-        $value = str_replace('&#150;', '-', $value);
-        $value = str_replace(chr(9), ' ', $value);
-        $value = str_replace(chr(10), ' ', $value);
-        $value = str_replace(chr(13), ' ', $value);
-        $value = str_replace(chr(31), '', $value);
-        $value = str_replace(chr(30), '', $value);
-        $value = str_replace(chr(29), '', $value);
-        $value = str_replace(chr(28), '', $value);
+        $value = str_replace(
+            array(
+                '&nbsp;',
+                '|',
+                '"',
+                '’',
+                '&#39;',
+                '&#150;',
+                chr(9),
+                chr(10),
+                chr(13),
+                chr(31),
+                chr(30),
+                chr(29),
+                chr(28),
+                "\n",
+                "\r"
+            ), array(
+            ' ',
+            ' ',
+            '\'',
+            '\'',
+            ' ',
+            '-',
+            ' ',
+            ' ',
+            ' ',
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+        ), $value);
         return $value;
     }
 

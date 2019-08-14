@@ -39,7 +39,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>0</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Choose period for Sync order</comment>
+							<comment>Choose a number of days</comment>
 						</period>
 						<date_import>
 							<label>Use the real date of import's order</label>
@@ -53,7 +53,6 @@
 						</date_import>
 						<processing_fee>
                             <label>Import processing fee from Marketplace</label>
-                            <comment>Import the processing fee</comment>
                             <frontend_type>select</frontend_type>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
@@ -111,8 +110,8 @@
                             <source_model>adminhtml/system_config_source_shipping_allmethods</source_model>
                         </default_shipping>
                     	<fake_email>
-							<label>Use fake emails</label>
-							<comment>Use fake emails for customer creation</comment>
+							<label>Use fictitious emails</label>
+							<comment>Use fictitious emails for customer creation</comment>
 							<frontend_type>select</frontend_type>
 							<sort_order>100</sort_order>
 							<show_in_default>1</show_in_default>

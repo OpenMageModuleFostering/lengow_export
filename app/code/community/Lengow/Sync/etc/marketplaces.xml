@@ -152,14 +152,20 @@
                     <value default="true">Colissimo</value>
                     <value>So Colissimo</value>
                     <value>CHRONOPOST</value>
+                    <value>DPD</value>
+                    <value>Mondial Relay</value>
                     <value>TNT</value>
                     <value>UPS</value>
                     <value>Fedex</value>
                     <value>Tatex</value>
                     <value>GLS</value>
                     <value>DHL</value>
-                    <value>DPD</value>
+                    <value>France Express</value>
+                    <value>Kiala</value>
+                    <value>Exapaq</value>
                     <value>Courrier Suivi</value>
+                    <value>Colis Prive</value>
+                    <value>Autre</value>
                 </accepted_values>
             </param>
         </additional_params>
@@ -3958,9 +3964,9 @@
             </param>
         </additional_params>
     </marketplace>
-    <marketplace name="home24_swde">
-       <api>https://wsdl.lengow.com/wsdl/home24_swde/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_swde/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+    <marketplace name="home24_chde">
+       <api>https://wsdl.lengow.com/wsdl/home24_chde/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+       <apibyline>https://wsdl.lengow.com/wsdl/home24_chde/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
        <states>
            <state name="new">
                <lengow>new</lengow>
@@ -4018,9 +4024,9 @@
             </param>
         </additional_params>
     </marketplace>
-    <marketplace name="home24_swfr">
-       <api>https://wsdl.lengow.com/wsdl/home24_swfr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_swfr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+    <marketplace name="home24_chfr">
+       <api>https://wsdl.lengow.com/wsdl/home24_chfr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+       <apibyline>https://wsdl.lengow.com/wsdl/home24_chfr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
        <states>
            <state name="new">
                <lengow>new</lengow>

@@ -51,7 +51,8 @@
                             <show_in_store>1</show_in_store>
                         </group>
                         <api_key>
-                            <label>Token API</label>             
+                            <label>Token API</label>
+                            <comment>You can find credentials on your Lengow Dashboard</comment>             
                             <frontend_type>text</frontend_type>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>

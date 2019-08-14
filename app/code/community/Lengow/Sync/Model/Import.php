@@ -194,7 +194,7 @@ class Lengow_Sync_Model_Import extends Varien_Object {
 
                     try {
                         $quote = $this->_createQuote($id_lengow_order, $order_data, $customer, $marketplace);
-                    } catch (Lengow_Sync_Model_Quote_Exception $e) {
+                    } catch (Exception $e) {
                         $this->_helper->log('create quote fail : ' . $e->getMessage(), $id_lengow_order);
                         continue;
                     }

@@ -14,7 +14,7 @@ class Lengow_Export_Model_Generate extends Varien_Object {
 
     protected $_file;
 
-    protected $_filename = 'lengow_feed';
+    protected $_fileName = 'lengow_feed';
 
     protected $_stream;
 
@@ -28,11 +28,13 @@ class Lengow_Export_Model_Generate extends Varien_Object {
 
     protected $_helper;
 
-    protected $_time = null;
+    protected $_fileTimeStamp = null;
 
     protected $_clear_parent_cache = 0;
 
     protected $categoryCache = array();
+
+    protected $_config = array();
 
     var $storeParents = array();
 
@@ -41,6 +43,7 @@ class Lengow_Export_Model_Generate extends Varien_Object {
         'short_description',
         'description',
         'quantity');
+    
     /**
      * Default fields.
      */
@@ -109,8 +112,23 @@ class Lengow_Export_Model_Generate extends Varien_Object {
         $time_start = $this->microtime_float();
 
         $this->_id_store = $id_store;
+
+        $store_code = Mage::app()->getStore($this->_id_store)->getCode();
+        $this->_config['directory_path'] = Mage::getBaseDir('media') . DS . 'lengow' . DS . $store_code . DS;
+
         if (!is_null($format))
             $this->_format = $format;
+        $this->_fileFormat = $this->_format;
+
+        if ($this->_isAlreadyLaunch()){
+            Mage::helper('lensync/data')->log('Feed already launch');
+
+            if(!$this->_stream) {
+                echo date('Y-m-d h:i:s') . ' - FEED ALREADY LAUNCH<br />';
+            }
+            exit();
+        }
+
         // Get products list to export
         $products = $this->_getProductsCollection($types, $status, $export_child, $out_of_stock, $selected_products, $limit, $offset, $ids_product);
         // Mode size, return count of products
@@ -277,7 +295,7 @@ class Lengow_Export_Model_Generate extends Varien_Object {
                 $array_data['qty'] = (integer) $qty_temp;
             $array_data['status'] = $product->getStatus() == Mage_Catalog_Model_Product_Status::STATUS_DISABLED ? 'Disabled' : 'Enabled';
             $array_data = array_merge($array_data, $product->getCategories($product, $parent_instance, $this->_id_store, $this->categoryCache));
-            $array_data = array_merge($array_data, $product->getPrices($product, $configurable_instance));
+            $array_data = array_merge($array_data, $product->getPrices($product, $configurable_instance, $this->_id_store));
             $array_data = array_merge($array_data, $product->getShippingInfo($product));
             // Images, gestion de la fusion parent / enfant
             if($this->_config_model->get('data/parentsimages') && isset($parent_instance) && $parent_instance  !== false)
@@ -302,7 +320,7 @@ class Lengow_Export_Model_Generate extends Varien_Object {
             $array_data['product_type'] = $product_type;
             $array_data['product_variation'] = $variation_name;
             $array_data['image_default'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage();
-            $array_data['child_name'] = $product->getName();
+            $array_data['child_name'] = $this->_helper->cleanData($product->getName(), $formatData);
             // Selected attributes to export with Frond End value of current shop
             if(!empty($attributes_to_export)) {
                 foreach($attributes_to_export as $field => $attr) {
@@ -368,7 +386,7 @@ class Lengow_Export_Model_Generate extends Varien_Object {
             flush();
             $this->_copyFile();
             $store_code = Mage::app()->getStore($this->_id_store)->getCode();
-            $url_file = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'lengow' . DS . $store_code . DS . $this->_filename . '.' . $this->_format;
+            $url_file = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'lengow' . DS . $store_code . DS . $this->_fileName . '.' . $this->_format;
             echo $this->_helper->__('Your feed is available here : %s' , '<a href="' . $url_file . '">' . $url_file . '</a>');
             Mage::helper('lensync/data')->log('Export of the store ' . Mage::app()->getStore($this->_id_store)->getName() . '(' . $this->_id_store . ') generated a file here : ' . $url_file);
         }
@@ -565,13 +583,67 @@ class Lengow_Export_Model_Generate extends Varien_Object {
      */
     protected  function _initFile()
     {
-        $this->_time = time();
-        $store_code = Mage::app()->getStore($this->_id_store)->getCode();
-        $file_path = Mage::getBaseDir('media') . DS . 'lengow' . DS . $store_code . DS;
+        if (!$this->_createDirectory()){ exit(); }
+
+        $this->_fileTimeStamp = time();
         $this->_file = new Varien_Io_File;
-        $this->_file->checkAndCreateFolder($file_path);
-        $this->_file->cd($file_path);
-        $this->_file->streamOpen($this->_filename . '.' . $this->_time . '.' . $this->_format, 'w+');
+        $this->_file->cd($this->_config['directory_path']);
+        $this->_file->streamOpen($this->_fileName . '.' . $this->_fileTimeStamp . '.' . $this->_fileFormat, 'w+');
+    }
+
+    protected function _createDirectory(){
+        try {
+            $file = new Varien_Io_File;
+            $file->checkAndCreateFolder($this->_config['directory_path']);
+        } catch (Exception $e) {
+            Mage::helper('lensync/data')->log('can\'t create folder '.$this->_config['directory_path'].'');
+            if ($this->_debug){
+                $this->_log('can\'t create folder '.$this->_config['directory_path']);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Is Feed Already Launch
+     *
+     * @return boolean
+     */
+    protected function _isAlreadyLaunch(){
+
+        $directory = $this->_config['directory_path'];
+        if (!$this->_createDirectory()){
+            exit();
+        }
+
+        try {
+            $listFiles = array_diff(scandir($directory), array('..', '.'));
+        } catch (Exception $e) {
+            Mage::helper('lensync/data')->log('Can\'t access folder '.$this->_config['directory_path']);
+            if ($this->_debug){
+                $this->_log('Can\'t access folder '.$this->_config['directory_path']);
+            }
+            exit();
+        }
+        foreach ($listFiles as $file) {
+            if (preg_match('/^' . $this->_fileName . '\.[\d]{10}/', $file)) {
+                $fileModified = date('Y-m-d H:i:s', filemtime($directory . $file));
+                $fileModifiedDatetime = new DateTime($fileModified);
+                $fileModifiedDatetime->add(new DateInterval('P10D'));
+
+                if (date('Y-m-d') > $fileModifiedDatetime->format('Y-m-d')) {
+                    unlink($directory . $file);
+                }
+
+                $fileModifiedDatetime = new DateTime($fileModified);
+                $fileModifiedDatetime->add(new DateInterval('PT20S'));
+                if (date('Y-m-d H:i:s') < $fileModifiedDatetime->format('Y-m-d H:i:s')) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -579,10 +651,9 @@ class Lengow_Export_Model_Generate extends Varien_Object {
      */
     protected  function _copyFile()
     {
-        $store_code = Mage::app()->getStore($this->_id_store)->getCode();
-        $file_path = Mage::getBaseDir('media') . DS . 'lengow' . DS . $store_code . DS;
-        copy($file_path . $this->_filename . '.' . $this->_time . '.' . $this->_format, $file_path . $this->_filename . '.' . $this->_format);
-        unlink($file_path . $this->_filename . '.' . $this->_time . '.' . $this->_format);
+        $file_path = $this->_config['directory_path'];
+        copy($file_path . $this->_fileName . '.' . $this->_fileTimeStamp . '.' . $this->_fileFormat, $file_path . $this->_fileName . '.' . $this->_fileFormat);
+        unlink($file_path . $this->_fileName . '.' . $this->_fileTimeStamp . '.' . $this->_fileFormat);
     }
 
     /**

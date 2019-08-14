@@ -4,7 +4,7 @@
  *
  * @category    Lengow
  * @package     Lengow_Export
- * @author      Ludovic Drin <ludovic@lengow.com> & Benjamin Le Nevé <benjamin.le-neve@lengow.com>
+ * @author      Ludovic Drin <ludovic@lengow.com> & Benjamin Le NevÃ© <benjamin.le-neve@lengow.com>
  * @copyright   2015 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -44,10 +44,14 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
 
             // check if store is enable for export
             if(Mage::getStoreConfig('lenexport/global/active_store', Mage::app()->getStore($id_store))) {
-
-                $generate = Mage::getSingleton('lenexport/generate');
+                
+                if(Mage::getStoreConfig('lenexport/performances/optimizeexport')) {
+                    $generate = Mage::getSingleton('lenexport/generateoptimize');
+                } else {
+                    $generate = Mage::getSingleton('lenexport/generate');
+                }
                 $generate->setCurrentStore($id_store);
-                $generate->setOriginalCurrency(Mage::app()->getStore()->getCurrentCurrencyCode());
+                $generate->setOriginalCurrency(Mage::app()->getStore($id_store)->getCurrentCurrencyCode());
 
                 // other params
                 $format = $this->getRequest()->getParam('format', null);
@@ -60,6 +64,7 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
                 $limit = $this->getRequest()->getParam('limit', null);
                 $offset = $this->getRequest()->getParam('offset', null);
                 $ids_product = $this->getRequest()->getParam('ids_product', null);
+                $debug = $this->getRequest()->getParam('debug', null);
 
                 if ($locale = $this->getRequest()->getParam('locale', null)) {
                     // changing locale works!
@@ -73,7 +78,34 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
                     $generate->setCurrentCurrencyCode($currency);
                 }
                 Mage::helper('lensync/data')->log('Start manual export in store ' . Mage::app()->getStore($id_store)->getName() . '(' . $id_store . ')');
-                $generate->exec($id_store, $mode, $format, $types, $status, $export_child, $out_of_stock, $selected_products, $stream, $limit, $offset, $ids_product);
+
+                try {
+                    if(Mage::getStoreConfig('lenexport/performances/optimizeexport')) {
+                        $generate->exec(
+                            $id_store,
+                            $format, 
+                            array(
+                                'mode' => $mode,
+                                'types' => $types,
+                                'status' => $status,
+                                'export_child' => $export_child,
+                                'out_of_stock' => $out_of_stock,
+                                'selected_products' => $selected_products,
+                                'stream' => $stream,
+                                'limit' => $limit,
+                                'offset' => $offset,
+                                'product_ids' => $ids_product,
+                                'debug' => $debug,
+                            )
+                        );
+                    } else {
+                        $generate->exec($id_store, $mode, $format, $types, $status, $export_child, $out_of_stock, $selected_products, $stream, $limit, $offset, $ids_product);
+                    }
+                } catch (Exception $e) {
+                    Mage::helper('lensync/data')->log('Stop manual export - Store ' . Mage::app()->getStore($id_store)->getName() . '(' . $id_store . ') - Error: ' . $e->getMessage());
+                    echo 'Error: '.$e->getMessage();
+                    flush();
+                }
             } else {
                 Mage::helper('lensync/data')->log('Stop manual export - Store ' . Mage::app()->getStore($id_store)->getName() . '(' . $id_store . ') is disabled');
                 header('Content-Type: text/html; charset=utf-8');

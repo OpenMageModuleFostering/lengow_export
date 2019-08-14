@@ -10,7 +10,8 @@
  */
 class Lengow_Export_Adminhtml_Lengow_ExportController extends Mage_Adminhtml_Controller_Action {
 
-	public function indexAction() {
+	public function indexAction()
+    {
         $this->loadLayout();
         $this->renderLayout();
         return $this;
@@ -19,14 +20,16 @@ class Lengow_Export_Adminhtml_Lengow_ExportController extends Mage_Adminhtml_Con
     /**
      * Product grid for AJAX request
      */
-    public function gridAction() {
+    public function gridAction()
+    {
         $this->loadLayout();
         $this->getResponse()->setBody(
             $this->getLayout()->createBlock('lenexport/adminhtml_product_grid')->toHtml()
         );
     }
 
-	public function massPublishAction() {
+	public function massPublishAction()
+    {
         $_product_ids = (array) $this->getRequest()->getParam('product');
         $_store_id = (integer) $this->getRequest()->getParam('store', Mage::app()->getStore()->getId());
         $_publish = (integer) $this->getRequest()->getParam('publish');
@@ -69,8 +72,14 @@ class Lengow_Export_Adminhtml_Lengow_ExportController extends Mage_Adminhtml_Con
     }
 
 
-	protected function _getSession() {
+	protected function _getSession()
+    {
 		return Mage::getSingleton('adminhtml/session');
 	}
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('lengow/export');
+    }
 
 }

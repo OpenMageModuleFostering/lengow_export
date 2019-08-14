@@ -10,7 +10,8 @@
  */
 class Lengow_Feed_Adminhtml_Lengow_FeedController extends Mage_Adminhtml_Controller_Action {
 
-    public function indexAction() {
+    public function indexAction()
+    {
         $this->loadLayout();
         $this->renderLayout();
         return $this;
@@ -19,22 +20,24 @@ class Lengow_Feed_Adminhtml_Lengow_FeedController extends Mage_Adminhtml_Control
     /**
      * Product grid for AJAX request
      */
-    public function gridAction() {
+    public function gridAction()
+    {
         $this->loadLayout();
         $this->getResponse()->setBody(
                 $this->getLayout()->createBlock('lenfeed/adminhtml_feed')->toHtml()
         );
     }
 
-    protected function _getSession() {
+    protected function _getSession()
+    {
         return Mage::getSingleton('adminhtml/session');
     }
 
     /**
      * Migrate feed
      */
-    public function migrateAction() {
-
+    public function migrateAction()
+    {
         $feed_ids = $this->getRequest()->getParam('feed_id');
         $selected_products = $this->getRequest()->getParam('selected_products');
         $product_out_stock = $this->getRequest()->getParam('product_out_stock');
@@ -92,6 +95,11 @@ class Lengow_Feed_Adminhtml_Lengow_FeedController extends Mage_Adminhtml_Control
             $this->_redirect('*/*/index/', array('store' => $_store_id));
         else
             $this->_redirect('*/*/index');
+    }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('lengow/feed');
     }
 
 }

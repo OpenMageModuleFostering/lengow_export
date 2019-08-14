@@ -17,7 +17,7 @@ class Lengow_Export_Model_Feed_Xml extends Lengow_Export_Model_Feed_Abstract {
     }
 
     public function makeHeader() {    
-        return '<?xml version="1.0" ?>' . "\r\n"
+        return '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n"
              . '<catalog>' . "\r\n";
     }
 

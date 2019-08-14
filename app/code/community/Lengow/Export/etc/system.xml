@@ -44,8 +44,8 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                         </export_only_selected>
                         <autoexport_newproduct>
-                            <label><![CDATA[Auto export new product]]></label>
-                            <comment><![CDATA[Auto export a new product on Lengow]]></comment>
+                            <label>Auto export new product</label>
+                            <comment>Auto export a new product on Lengow</comment>
                             <frontend_type>select</frontend_type>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -54,7 +54,7 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                         </autoexport_newproduct>
                         <export_soldout>
-                            <label>Export product out of stock</label>
+                            <label>Export out of stock product</label>
                             <comment></comment>
                             <frontend_type>select</frontend_type>
                             <sort_order>40</sort_order>
@@ -104,7 +104,7 @@
                     <sort_order>2</sort_order>
                     <fields>
                         <format>
-                            <label>Format</label>
+                            <label>Export default format</label>
                             <frontend_type>select</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
@@ -152,7 +152,7 @@
                         </without_product_ordering>
                         <formatdata>
                             <label>Convert data</label>
-                            <comment><![CDATA[Replace special chars with html chars]]></comment>
+                            <comment>Replace special chars with html chars</comment>
                             <frontend_type>select</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
@@ -237,16 +237,26 @@
                     <fields>
                         <valid_ip>
                             <label>Ip authorised to export</label>
-                            <comment><![CDATA[Authorized acces to catalog export by IP, separated by ;]]></comment>
+                            <comment>Authorized acces to catalog export by IP, separated by ;</comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </valid_ip>
+                        <optimizeexport>
+                            <label>Optimize Export File</label>
+                            <comment>Beta feature: enable this option to get a faster export</comment>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                        </optimizeexport>
                         <usesavefile>
                             <label>Save feed on file</label>
-                            <comment><![CDATA[Save the feed on a file]]></comment>
+                            <comment>Save the feed on a file</comment>
                             <frontend_type>select</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
@@ -255,8 +265,8 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                         </usesavefile>
                         <active_cron>
-                            <label><![CDATA[Active cron]]></label>
-                            <comment><![CDATA[Active the scheduled task for export your feed every 4h]]></comment>
+                            <label>Active cron</label>
+                            <comment>Active the scheduled task for export your feed every 4h</comment>
                             <frontend_type>select</frontend_type>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>

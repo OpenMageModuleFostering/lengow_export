@@ -5,14 +5,9 @@
             <block type="lentracker/tracker" name="lengow_tracker" template="lengow/tracker/tag.phtml" />
         </reference>
     </default>
-
     <checkout_onepage_index translate="label">
         <reference name="head">
-            <action method="addItem">
-                <type>skin_js</type>
-                <name>lengow/js/tracker.js</name>
-            </action>
+            <action method="addItem"><type>skin_js</type><name>lengow/js/tracker.js</name></action>
         </reference>
     </checkout_onepage_index>
-    
 </layout>

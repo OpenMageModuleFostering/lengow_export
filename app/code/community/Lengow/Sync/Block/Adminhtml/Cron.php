@@ -1,14 +1,16 @@
 <?php
+
 /**
- * Lengow grid products block
+ * Lengow sync block adminhtml cron
  *
  * @category    Lengow
- * @package     Lengow_Cron
- * @author      Pierre Basile <pierre.basile@lengow.com>
- * @copyright   2015 Lengow SAS
+ * @package     Lengow_Sync
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Sync_Block_Adminhtml_Cron extends Mage_Adminhtml_Block_Widget_Grid_Container {
+class Lengow_Sync_Block_Adminhtml_Cron extends Mage_Adminhtml_Block_Widget_Grid_Container
+{
 
     public function __construct()
     {

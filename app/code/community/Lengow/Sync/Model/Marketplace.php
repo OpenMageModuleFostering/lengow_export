@@ -1,375 +1,500 @@
 <?php
 
 /**
- * Copyright 2013 Lengow.
+ * Lengow sync model marketplace
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may obtain
- * a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * @category    Lengow
+ * @package     Lengow_Sync
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+class Lengow_Sync_Model_Marketplace
+{
 
-
-/**
- * The Lengow Marketplace Class.
- *
- * @author Ludovic Drin <ludovic@lengow.com>
- * @copyright 2013 Lengow SAS
- */
-
-class Lengow_Sync_Model_Marketplace {
-
-    public static $XML_MARKETPLACES = 'marketplaces.xml';
-    public static $DOM;
     public static $VALID_ACTIONS = array(
-                            //  'accept' ,
-                                'shipped' ,
-                                'refuse' ,
-                                'link' ,
-                                );
-    public static $WSDL_LINK_ORDER = 'https://wsdl.lengow.com/wsdl/link/#MP#/#ID_CLIENT#/#ID_FLUX#/#ORDER_ID#/#INTERNAL_ORDER_ID#/update.xml';
-    public $name;
-    public $object;
-    public $is_loaded = false;
-    public $states_lengow = array();
-    public $states = array();
-    public $actions = array();
-    public $payments = array();
-    public $payments_lengow = array();
-    protected $_config;
+        'ship',
+        'cancel'
+    );
+
     const MARKETPLACE_STATUS_NO_MATCH = -1;
 
+    public $MARKETPLACES;
+
+    public $marketplace;
+
+    public $name;
+
+    public $legacy_code;
+
+    public $is_loaded = false;
+
+    public $states_lengow = array();
+
+    public $states = array();
+
+    public $actions = array();
+
+    public $arg_values = array();
+
+    public $carriers = array();
+
+    protected $_connector;
+
+    protected $_accountId;
 
     /**
-      * Construct a new Markerplace instance with xml configuration.
-      *
-      * @param string $name The name of the marketplace
-      */
-    public function set($name) {
-        $this->_helper = Mage::helper('lensync/data');
-        $this->_loadXml();
-        $this->name = strtolower($name);
-        $object = self::$DOM->xpath('/marketplaces/marketplace[@name=\'' . $this->name . '\']');
-        if(!empty($object)) {
-            $this->object = $object[0];
-            $this->api_url = (string) $this->object->api;
-            // States
-            foreach($this->object->states->state as $state) {
-                $this->states_lengow[(string) $state['name']] = (string) $state->lengow;
-                $this->states[(string) $state->lengow] = (string) $state['name'];
-                if(isset($state->actions)) {
-                    foreach($state->actions->action as $action) {
-                        $this->actions[(string) $action['type']] = array();
-                        $this->actions[(string) $action['type']]['name'] = (string) $action;
-                        $params = self::$DOM->xpath('/marketplaces/marketplace[@name=\'' . $this->name . '\']/additional_params/param[@usedby=\'' . (string) $action['type']. '\']');
-                        if(count($params)) {
-                          foreach($params as $param) {
-                              $this->actions[(string) $action['type']]['params'][(string) $param->type]['name'] = (string) $param->name;
-                              if(isset($param->accepted_values)) {
-                                  $this->actions[(string) $action['type']]['params'][(string) $param->type]['accepted_values'] = $param->accepted_values->value;
-                                  $default = self::$DOM->xpath('/marketplaces/marketplace[@name=\'' . $this->name . '\']/additional_params/param[@usedby=\'' . (string) $action['type']. '\']/accepted_values/value[@default=\'true\']');
-                                  if($default)
-                                      $this->actions[(string) $action['type']]['params'][(string) $param->type]['accepted_values_default'] = (string) $default[0];
-                              }
-                          }
-                        }
-                    }
-                }
-            }
-            // Payment
-            if(count($this->object->payments)) {
-                foreach($this->object->payments->payment as $payment) {
-                    $this->payment_lengow[(string) $payment['name']] = (string) $payment->lengow;
-                    $this->payment[(string) $payment->lengow] = (string) $payment['name'];
-                }
-            }
-            $this->is_loaded = true;
+     * Construct
+     *
+     * @param array $args
+     *
+     * @return Lengow_Sync_Model_Marketplace
+     */
+    public function __construct($args)
+    {
+        if (!is_array($args)) {
+            return;
+        }
+        foreach ($args as $key => $value) {
+            $this->{'_'.$key} = $value;
         }
     }
 
     /**
-      * If marketplace exist in xml configuration file
-      *
-      * @return boolean
-      */
-    public function isLoaded() {
+     * Load a new Markerplace instance.
+     *
+     * @param string $name The name of the marketplace
+     */
+    public function set($name)
+    {
+        if ($this->_loadApiMarketplace()) {
+            $this->name = strtolower($name);
+            if (isset($this->MARKETPLACES->{$this->name})) {
+                $this->marketplace = $this->MARKETPLACES->{$this->name};
+                if (!empty($this->marketplace)) {
+                    $this->legacy_code = $this->marketplace->legacy_code;
+                    foreach ($this->marketplace->orders->status as $key => $state) {
+                        foreach ($state as $value) {
+                            $this->states_lengow[(string)$value] = (string)$key;
+                            $this->states[(string)$key][(string)$value] = (string)$value;
+                        }
+                    }
+                    foreach ($this->marketplace->orders->actions as $key => $action) {
+                        foreach ($action->status as $state) {
+                            $this->actions[(string)$key]['status'][(string)$state] = (string)$state;
+                        }
+                        foreach ($action->args as $arg) {
+                            $this->actions[(string)$key]['args'][(string)$arg] = (string)$arg;
+                        }
+                        foreach ($action->optional_args as $optional_arg) {
+                            $this->actions[(string)$key]['optional_args'][(string)$optional_arg] = $optional_arg;
+                        }
+                        foreach ($action->args_description as $key => $arg_description) {
+                            $valid_values = array();
+                            if (isset($arg_description->valid_values)) {
+                                foreach ($arg_description->valid_values as $code => $valid_value) {
+                                    $valid_values[(string)$code] = (string)$valid_value->label;
+                                }
+                            }
+                            $this->arg_values[(string)$key] = array(
+                                'default_value'      => (string)$arg_description->default_value,
+                                'accept_free_values' => (bool)$arg_description->accept_free_values,
+                                'valid_values'       => $valid_values
+                            );
+                        }
+                    }
+                    if (isset($this->marketplace->orders->carriers)) {
+                        foreach ($this->marketplace->orders->carriers as $key => $carrier) {
+                            $this->carriers[(string)$key] = (string)$carrier->label;
+                        }
+                    }
+                    $this->is_loaded = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Load the json configuration of all marketplaces
+     *
+     * @param integer $account_id
+     *
+     * @return boolean
+     */
+    private function _loadApiMarketplace()
+    {
+        if (!$this->MARKETPLACES) {
+            if ($this->_connector->isValidAuth($this->_accountId)) {
+                $results = $this->_connector->get(
+                    '/v3.0/marketplaces',
+                    array(
+                        'account_id' => $this->_accountId
+                    ),
+                    'stream'
+                );
+                $this->MARKETPLACES = json_decode($results);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * If marketplace exist in xml configuration file
+     *
+     * @return boolean
+     */
+    public function isLoaded()
+    {
         return $this->is_loaded;
     }
 
     /**
-      * Get the real lengow's state
-      *
-      * @param string $name The marketplace state
-      *
-      * @return string The lengow state
-      */
-    public function getStateLengow($name) {
-        return array_key_exists($name, $this->states_lengow) ? $this->states_lengow[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
+     * Get the real lengow's state
+     *
+     * @param string $name The marketplace state
+     *
+     * @return string The lengow state
+     */
+    public function getStateLengow($name)
+    {
+        return array_key_exists($name, $this->states_lengow)
+            ? $this->states_lengow[$name]
+            : self::MARKETPLACE_STATUS_NO_MATCH;
     }
 
     /**
-      * Get the marketplace's state
-      *
-      * @param string $name The lengow state
-      *
-      * @return string The marketplace state
-      */
-    public function getState($name) {
+     * Get the marketplace's state
+     *
+     * @param string $name The lengow state
+     *
+     * @return string The marketplace state
+     */
+    public function getState($name)
+    {
         return array_key_exists($name, $this->states) ? $this->states[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
     }
 
     /**
-      * Get the real lengow's payment
-      *
-      * @param string $name The payment state
-      *
-      * @return string The lengow payment state
-      */
-    public function getStatePaymentLengow($name) {
-        return array_key_exists($name, $this->payments_lengow) ? $this->payments_lengow[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
+     * Get the action with parameters
+     *
+     * @param string $name The action's name
+     *
+     * @return array
+     */
+    public function getAction($name)
+    {
+        return array_key_exists($name, $this->actions) ? $this->actions[$name] : false;
     }
 
     /**
-      * Get the marketplace's payment
-      *
-      * @param string $name The lengow payment
-      *
-      * @return string The marketplace payment
-      */
-    public function getStatePayment($name) {
-        return array_key_exists($name, $this->payments) ? $this->payments[$name] : self::MARKETPLACE_STATUS_NO_MATCH;
+     * If action exist
+     *
+     * @param string $name The marketplace state
+     *
+     * @return boolean
+     */
+    public function isAction($name)
+    {
+        return array_key_exists($name, $this->actions) ? true : false;
     }
 
     /**
-      * Get the action with parameters
-      *
-      * @param string $name The action's name
-      *
-      * @return array
-      */
-    public function getAction($name) {
-        return $this->actions[$name];
+     * Return array of marketplaces from the marketplaces.xml file
+     *
+     * @return array $marketplaces
+     */
+    public function getMarkeplaces()
+    {
+        $marketplaces = array();
+        if ($this->_loadApiMarketplace()) {
+            foreach ($this->MARKETPLACES as $key => $marketplace) {
+                $marketplaces[(string)$key] = (string)$key;
+            }
+            ksort($marketplaces);
+        }
+        return $marketplaces;
     }
 
     /**
-      * If action exist
-      *
-      * @param string $name The marketplace state
-      *
-      * @return boolean
-      */
-    public function isAction($name) {
-        return isset($this->actions[$name]) ? true : false;
+     * Check if a status is valid for action
+     *
+     * @param array $action_status valid status for action
+     * @param string $current_status curent status id
+     *
+     * @return boolean
+     */
+    public function isValidState($action_status, $current_status)
+    {
+        $model_order = Mage::getModel('lensync/order');
+        foreach ($action_status as $status) {
+            if ($current_status == $model_order->getOrderState($status)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-      * Call the Lengow WSDL for current marketplace
-      *
-      * @param string $action The name of the action
-      * @param string $id_feed The flux ID
-      * @param Mage_Sales_Model_Order $order The order
-      * @param string $args An array of arguments
-      */
-    public function wsdl($action, $id_feed, Mage_Sales_Model_Order $order, Mage_Sales_Model_Order_Shipment $shipment, $args = array()) {
-        if(!in_array($action, self::$VALID_ACTIONS))
+    * Get the default value for argument
+    *
+    * @param string $name The argument's name
+    *
+    * @return mixed
+    */
+    public function getDefaultValue($name)
+    {
+        if (array_key_exists($name, $this->arg_values)) {
+            $default_value = $this->arg_values[$name]['default_value'];
+            if (!empty($default_value)) {
+                return $default_value;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Call the Lengow WSDL for current marketplace
+     *
+     * @param string                            $action             The name of the action
+     * @param string                            $id_lengow_order    Lengow Order ID
+     * @param Mage_Sales_Model_Order            $order              Magento order
+     * @param Mage_Sales_Model_Order_Shipment   $shipment           Magento shipment
+     * @param string                            $args               An array of arguments
+     *
+     */
+    public function wsdl(
+        $action,
+        $id_lengow_order,
+        Mage_Sales_Model_Order $order,
+        Mage_Sales_Model_Order_Shipment $shipment,
+        $args = array()
+    ) {
+        if (!in_array($action, self::$VALID_ACTIONS)) {
             return false;
-        if(!$this->isAction($action))
+        }
+        if (!$this->isAction($action)) {
             return false;
-        $call_url = false;
-        switch($action) {
-            case 'shipped' :
-                $call_url = $this->api_url;
-                $call_url = str_replace('#ID_FLUX#', $id_feed, $call_url);
-                $call_url = str_replace('#ORDER_ID#', $order->getData('order_id_lengow'), $call_url);
-                $action_array = $this->getAction($action);
-                $action_callback = $action_array['name'];
-                $call_url = str_replace('#ACTION#', $action_callback, $call_url);
-                if(isset($action_array['params'])) {
-                    $gets = array();
-                    foreach($action_array['params'] as $type => $param) {
-                        switch($type) {
-                            case 'tracking' :
+        }
+        $store = $order->getStore();
+        $lensync_config = Mage::getModel('lensync/config', array('store' => $store));
+        $action_array = $this->getAction($action);
+        if (!$action_array) {
+            return false;
+        }
+        $params = array(
+            'account_id' => $this->_accountId,
+            'marketplace_order_id' => (string)$id_lengow_order,
+            'marketplace' => (string)$order->getData('marketplace_lengow')
+        );
+        if (isset($action_array['optional_args'])) {
+            $all_args = array_merge($action_array['args'], $action_array['optional_args']);
+        } else {
+            $all_args = $action_array['args'];
+        }
+        switch ($action) {
+            case 'ship':
+                $params['action_type'] = 'ship';
+                if (isset($action_array['args'])) {
+                    foreach ($all_args as $arg) {
+                        switch ($arg) {
+                            case 'tracking_number':
                                 $trackings = $shipment->getAllTracks();
-                                if(!empty($trackings)) {
-                                    $first_track = $trackings[0];
-                                    $gets[$param['name']] = array(
-                                                'value' => $first_track->getNumber(),
-                                                'require' => (array_key_exists('require', $param) ? explode(' ', $param['require']) : array())
-                                              );
+                                if (!empty($trackings)) {
+                                    $last_track = end($trackings);
                                 }
+                                $params[$arg] = isset($last_track) ? $last_track->getNumber() : '';
                                 break;
-                            case 'carrier' :
+                            case 'carrier':
+                            case 'shipping_method':
                                 $trackings = $shipment->getAllTracks();
-                                if(!empty($trackings)) {
-                                    $first_track = $trackings[0];
-                                    $gets[$param['name']] = array(
-                                                'value' => $this->_matchCarrier($param, $first_track->getCarrierCode(), $first_track->getTitle()),
-                                                'require' => (array_key_exists('require', $param) ? explode(' ', $param['require']) : array())
-                                              );
+                                if (!empty($trackings)) {
+                                    $last_track = end($trackings);
                                 }
+                                $params[$arg] = isset($last_track)
+                                    ? $this->_matchCarrier($last_track->getCarrierCode(), $last_track->getTitle())
+                                    : '';
                                 break;
-                            case 'tracking_url' :
+                            case 'shipping_price':
+                                $params[$arg] = $order->getShippingInclTax();
                                 break;
-                            case 'shipping_price' :
-                                $gets[$param['name']] = array(
-                                            'value' => $order->getShippingInclTax(),
-                                            'require' => (array_key_exists('require', $param) ? explode(' ', $param['require']) : array())
-                                          );
+                            case 'shipping_date':
+                                $params[$arg] = date('c');
+                                break;
+                            default:
+                                $default_value = $this->getDefaultValue((string)$arg);
+                                $param_value = $default_value ? $default_value : $arg.' not available';
+                                $params[$arg] = $param_value;
                                 break;
                         }
                     }
-                    // Check dependencies in parameters
-                    if(count($gets) > 0) {
-                        foreach($gets as $key => $get) {
-                            if(array_key_exists('require', $get) && !empty($get['require'])) {
-                                foreach($get['require'] as $require) {
-                                    if($gets[$require]['value'] == '') {
-                                        unset($gets[$require]);
-                                        unset($gets[$key]);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // Build URL
-                    $url = array();
-                    foreach($gets as $key => $value) {
-                      $url[] = $key . '=' . urlencode($value['value']);
-                    }
-                    $call_url .= '?' . implode('&', $url);
                 }
                 break;
-            case 'refuse' :
-                $call_url = $this->api_url;
-                $call_url = str_replace('#ID_FLUX#', $id_feed, $call_url);
-                $call_url = str_replace('#ORDER_ID#', $order->getData('order_id_lengow'), $call_url);
-                $action_array = $this->getAction($action);
-                $action_callback = $action_array['name'];
-                $call_url = str_replace('#ACTION#', $action_callback, $call_url);
-                if(isset($action_array['params'])) {
-                    $gets = array();
-                    foreach($action_array['params'] as $type => $param) {
-                        switch($type) {
-                            case 'refused_reason' :
+            case 'cancel':
+                $params['action_type'] = 'cancel';
+                if (isset($all_args['args'])) {
+                    foreach ($all_args as $arg) {
+                        switch ($arg) {
+                            default:
+                                $default_value = $this->getDefaultValue((string)$arg);
+                                $param_value = $default_value ? $default_value : $arg.' not available';
+                                $params[$arg] = $param_value;
                                 break;
                         }
                     }
-                    if(count($gets) > 0)
-                        $call_url .= '?' . implode('&', $gets);
                 }
                 break;
-            case 'link' :
-                $call_url = self::$WSDL_LINK_ORDER;
-                $call_url = str_replace('#MP#', $this->name, $call_url);
-                $call_url = str_replace('#ID_CLIENT#', $args['id_client'], $call_url);
-                $call_url = str_replace('#ID_FLUX#', $id_feed, $call_url);
-                $call_url = str_replace('#ORDER_ID#', $order->getData('order_id_lengow'), $call_url);
-                $call_url = str_replace('#INTERNAL_ORDER_ID#', $order->getData('entity_id'), $call_url);
         }
         try {
-            if($call_url) {
-                if(!Mage::getSingleton('lensync/config')->isDebugMode()) {
-                    $this->_makeRequest($call_url);
+            // if line_id is a required parameter -> send a call for each line_id
+            if (in_array('line', $all_args)) {
+                $order_line_sent = false;
+                $order_lines = Mage::getModel('lensync/order')->getOrderLineFromIdOrder((integer)$order->getId());
+                if ($order_lines) {
+                    foreach ($order_lines as $order_line) {
+                        $params['line'] = $order_line['id_order_line'];
+                        if (!$lensync_config->isDebugMode()) {
+                            $result = $this->_connector->post('/v3.0/orders/actions/', $params);
+                            if (isset($result->id)) {
+                                Mage::helper('lensync/data')->log(
+                                    'WSDL : action '.$action.' successfully sent',
+                                    $id_lengow_order
+                                );
+                            } else {
+                                Mage::helper('lensync/data')->log(
+                                    'WSDL : WARNING ! action '.$action.' could NOT be sent: '.json_encode($result),
+                                    $id_lengow_order
+                                );
+                            }
+                        }
+                        // Get all params send
+                        $param_list = false;
+                        foreach ($params as $param => $value) {
+                            $param_list.= (!$param_list ? '"'.$param.'": '.$value : ' -- "'.$param.'": '.$value);
+                        }
+                        Mage::helper('lensync/data')->log('WSDL : '.$param_list, $id_lengow_order);
+                    }
                 }
-                Mage::helper('lensync')->log('WSDL call Lengow : ' . $call_url, $order->getData('order_id_lengow'));
+            } else {
+                if (!$lensync_config->isDebugMode()) {
+                    $result = $this->_connector->post('/v3.0/orders/actions/', $params);
+                    if (isset($result->id)) {
+                        Mage::helper('lensync/data')->log(
+                            'WSDL : action '.$action.' successfully sent',
+                            $id_lengow_order
+                        );
+                    } else {
+                        Mage::helper('lensync/data')->log(
+                            'WSDL : WARNING ! action '.$action.' could NOT be sent: '.json_encode($result),
+                            $id_lengow_order
+                        );
+                    }
+                }
+                // Get all params send
+                $param_list = false;
+                foreach ($params as $param => $value) {
+                    $param_list.= (!$param_list ? '"'.$param.'": '.$value : ' -- "'.$param.'": '.$value);
+                }
+                Mage::helper('lensync/data')->log('WSDL : '.$param_list, $id_lengow_order);
             }
-        } catch(Lengow_Sync_Model_Marketplace_Exception $e) {
-            Mage::helper('lensync')->log('call error WSDL ' . $call_url, $order->getData('order_id_lengow'));
-            Mage::helper('lensync')->log('exception ' . $e->getMessage(), $order->getData('order_id_lengow'));
+        } catch (Exception $e) {
+            Mage::helper('lensync/data')->log('call error WSDL - exception: '.$e->getMessage(), $id_lengow_order);
         }
     }
 
     /**
-      * Match carrier's name with accepted values
-      *
-      * @param Simple_Xml_Element $param The node parameters
-      * @param string             $name  The carrier name
-      *
-      * @return string The matching carrier name
-      */
-    private function _matchCarrier($param, $name, $title) {
-        // No match
-        if(!isset($param['accepted_values']))
-            return $title;
-        // Exact match
-        foreach($param['accepted_values'] as $value) {
-            $value = (string) $value;
-            if(preg_match('`' . $value . '`i', trim($name)))
+     * Match carrier's name with accepted values
+     *
+     * @param string $code
+     * @param string $title
+     *
+     * @return string The matching carrier name
+     */
+    private function _matchCarrier($code, $title)
+    {
+        // no carrier
+        if (count($this->carriers) == 0) {
+            if ($code == 'custom') {
+                return $title;
+            }
+            return $code;
+        }
+        // search by code
+        // exact match
+        foreach ($this->carriers as $key => $carrier) {
+            $value = (string)$key;
+            if (preg_match('`'.$value.'`i', trim($code))) {
                 return $value;
-
+            }
         }
-
-        // Approximately match
-        foreach($param['accepted_values'] as $value) {
-            $value = (string) $value;
-            if(preg_match('`.*?' . $value . '.*?`i', $name))
-              return $value;
-
+        // approximately match
+        foreach ($this->carriers as $key => $carrier) {
+            $value = (string)$key;
+            if (preg_match('`.*?'.$value.'.*?`i', $code)) {
+                return $value;
+            }
         }
-
         // search by title
-        if (strtoupper($title) == 'GLS S')
+        if (strtoupper($title) == 'GLS S') {
             $title = 'GLS';
-        // Exact match
-        foreach($param['accepted_values'] as $value) {
-            $value = (string) $value;
-            if(preg_match('`' . $value . '`i', trim($title)))
+        }
+        // exact match
+        foreach ($this->carriers as $key => $carrier) {
+            $value = (string)$key;
+            if (preg_match('`'.$value.'`i', trim($title))) {
                 return $value;
-
+            }
         }
-
-        // Approximately match
-        foreach($param['accepted_values'] as $value) {
-            $value = (string) $value;
-            if(preg_match('`.*?' . $value . '.*?`i', $title))
-              return $value;
-
+        // approximately match
+        foreach ($this->carriers as $key => $carrier) {
+            $value = (string)$key;
+            if (preg_match('`.*?'.$value.'.*?`i', $title)) {
+                return $value;
+            }
         }
-        return $param['accepted_values_default'];
+        // no match
+        if ($code == 'custom') {
+            return $title;
+        }
+        return $code;
     }
 
     /**
-      * Load the xml configuration of all marketplaces
-      */
-    private function _loadXml() {
-        if(!self::$DOM) {
-            self::$DOM = simplexml_load_file(Mage::getModuleDir('etc', 'Lengow_Sync') . DS . self::$XML_MARKETPLACES);
+     * Check and change the name of the marketplace for v3 compatibility
+     *
+     * @param Mage_Sales_Model_Order  $order  Magento order
+     *
+     * @return Mage_Sales_Model_Order
+     */
+    public function checkAndChangeMarketplaceName(Mage_Sales_Model_Order $order)
+    {
+        $results = $this->_connector->get(
+            '/v3.0/orders',
+            array(
+                'marketplace_order_id' => (string)$order->getData('order_id_lengow'),
+                'marketplace'          => (string)$order->getData('marketplace_lengow'),
+                'account_id'           => $this->_accountId
+            ),
+            'stream'
+        );
+        if (is_null($results)) {
+            return $order;
         }
-    }
-
-    /**
-      * Makes an HTTP request.
-      *
-      * @param string $url The URL to make the request to
-      *
-      * @return string The response text
-      */
-    protected function _makeRequest($url) {
-        $ch = curl_init();
-        // Options
-        $connector = Mage::getSingleton('lensync/connector');
-        $opts = $connector::$CURL_OPTS;
-        $opts[CURLOPT_URL] = $url;
-        // Exectute url request
-        curl_setopt_array($ch, $opts);
-        $result = curl_exec($ch);
-        if ($result === false) {
-            throw new Lengow_Sync_Model_Marketplace_Exception(
-                array('message' => curl_error($ch),
-                      'type' => 'CurlException',
-                ),
-                curl_errno($ch)
-            );
+        $results = json_decode($results);
+        if (!is_object($results)) {
+            return $order;
         }
-        curl_close($ch);
-        return $result;
+        if (isset($results->error)) {
+            return $order;
+        }
+        foreach ($results->results as $result) {
+            if ((string)$order->getData('marketplace_lengow') != (string)$result->marketplace) {
+                $order->setMarketplaceLengow((string)$result->marketplace);
+                $order->save();
+            }
+        }
+        return $order;
     }
-
 }

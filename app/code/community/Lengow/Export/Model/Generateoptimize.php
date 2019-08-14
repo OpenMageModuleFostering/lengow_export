@@ -1,14 +1,16 @@
 <?php
+
 /**
- * Lengow adminhtml export controller
+ * Lengow export model generateoptimize
  *
  * @category    Lengow
  * @package     Lengow_Export
- * @author      Ludovic Drin <ludovic@lengow.com> & Benjamin Le NevÃ© <benjamin.le-neve@lengow.com>
- * @copyright   2015 Lengow SAS
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Export_Model_Generateoptimize extends Varien_Object {
+class Lengow_Export_Model_Generateoptimize extends Varien_Object
+{
 
     protected $_id_store;
     protected $_websiteId;
@@ -56,25 +58,29 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
     //option in magento configration
     protected $_config = array();
 
-    protected $_excludes = array('media_gallery',
+    protected $_excludes = array(
+        'media_gallery',
         'tier_price',
         'short_description',
         'description',
-        'quantity');
+        'quantity'
+    );
     /**
      * Default fields.
      */
-    public static $DEFAULT_FIELDS = array('sku' => 'sku' ,
-        'entity_id' => 'product-id' ,
-        'parent-id' => 'parent-id' ,
-        'qty' => 'qty' ,
-        'name' => 'name' ,
-        'description' => 'description' ,
-        'short_description' => 'short_description' ,
-        'price-ttc' => 'price-ttc' ,
-        'shipping-name' => 'shipping-name' ,
-        'image-url-1' => 'image-url-1' ,
-        'product-url' => 'product-url');
+    public static $DEFAULT_FIELDS = array(
+        'sku' => 'sku',
+        'entity_id' => 'product-id',
+        'parent-id' => 'parent-id',
+        'qty' => 'qty',
+        'name' => 'name',
+        'description' => 'description',
+        'short_description' => 'short_description',
+        'price-ttc' => 'price-ttc',
+        'shipping-name' => 'shipping-name',
+        'image-url-1' => 'image-url-1',
+        'product-url' => 'product-url'
+    );
 
     protected $_attributes = array(
         'sku',
@@ -169,8 +175,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         //get configuration data
         $this->_config['category_max_level'] = $this->_config_model->get('data/levelcategory');
         $this->_config['number_product_by_query'] = 2000;
-        $this->_config["query_url_option"] = (version_compare(Mage::getVersion(), '1.6.0', '<')) ?  'options=\'\'' : 'ISNULL(options)';
-
+        $this->_config["query_url_option"] = (version_compare(Mage::getVersion(), '1.6.0',
+            '<')) ? 'options=\'\'' : 'ISNULL(options)';
 
         //Get Table Definition
         $this->_coreResource = Mage::getSingleton('core/resource');
@@ -214,8 +220,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
     }
 
 
-    public function getTotalProductStore($storeId){
-
+    public function getTotalProductStore($storeId)
+    {
         $this->_id_store = $storeId;
         $this->_websiteId = Mage::getModel('core/store')->load($this->_id_store)->getWebsiteId();
 
@@ -226,18 +232,17 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         return $productCollection->getFirstItem()->getTotal();
     }
 
-    public function _getQuery(){
-
-
+    public function _getQuery()
+    {
         $productCollection = Mage::getModel('lenexport/product_collection')->getCollection()->addStoreFilter($this->_id_store);
 
         // Filter status
-        if ($this->_config['product_status'] !== null){
+        if ($this->_config['product_status'] !== null) {
             $productCollection->addAttributeToFilter('status', array('eq' => $this->_config['product_status']));
         }
 
         //filter type
-        if($this->_config['force_type']) {
+        if ($this->_config['force_type']) {
             $_types = explode(',', $this->_config['force_type']);
         } else {
             $_types = $this->_config_model->get('global/producttype');
@@ -251,10 +256,10 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
 
         $this->_joinStock($productCollection);
 
-        if ($this->_config['only_selected_product']){
+        if ($this->_config['only_selected_product']) {
             $productCollection->addAttributeToFilter('lengow_product', array('eq' => 1));
         }
-        if ($this->_config['product_ids']){
+        if ($this->_config['product_ids']) {
             $productCollection->addAttributeToFilter('entity_id', array('in' => $this->_config['product_ids']));
         }
 
@@ -262,7 +267,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
             'url.product_id=e.entity_id AND url.target_path NOT LIKE "category%" AND is_system=1 AND ' . $this->_config["query_url_option"] . ' AND url.store_id=' . $this->_id_store,
             array('request_path' => 'MAX(DISTINCT request_path)'));
 
-        $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product'] . ' AS categories', 'categories.product_id=e.entity_id');
+        $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product'] . ' AS categories',
+            'categories.product_id=e.entity_id');
         $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product_index'] . ' AS categories_index',
             '((categories_index.category_id=categories.category_id AND categories_index.product_id=categories.product_id) ) AND categories_index.store_id=' . $this->_id_store,
             array('categories_ids' => 'GROUP_CONCAT(DISTINCT categories_index.category_id)'));
@@ -284,18 +290,18 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
     /**
      * Make the feed
      *
-     * @param integer $id_store           ID of store
-     * @param varchar $mode               The mode of export
+     * @param integer $id_store ID of store
+     * @param varchar $mode The mode of export
      *                                        size : display only count of products to export
      *                                        full : export simple product + configured product
      *                                        xxx,yyy : export xxx type product + yyy type product
-     * @param varchar $format             Format of export
-     * @param array $params             List of options
+     * @param varchar $format Format of export
+     * @param array $params List of options
      *
      * @return Mage_Catalog_Model_Product
      */
-    public function exec($id_store, $format, $params = array()) {
-
+    public function exec($id_store, $format, $params = array())
+    {
         $this->_debug = true;
 
         //store start time export
@@ -306,23 +312,26 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
 
         $store_code = Mage::app()->getStore($this->_id_store)->getCode();
 
-        $this->_config['include_tax'] = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX, $this->_id_store);
+        $this->_config['include_tax'] = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX,
+            $this->_id_store);
         $this->_config['directory_path'] = Mage::getBaseDir('media') . DS . 'lengow' . DS . $store_code . DS;
-        $this->_config['image_base_url'] = substr(Mage::app()->getStore($this->_id_store)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA, false), 0, -1).'/catalog/product';
-        $this->_config['force_type'] = array_key_exists('forced_type',$params) ? $params['forced_type'] : false;
-        $this->_config['product_status'] = array_key_exists('status',$params) ? $params['status'] : null;
-        $this->_config['product_ids'] = array_key_exists('product_ids',$params) ? $params['product_ids'] : false;
-        $this->_debug = array_key_exists('debug',$params) ? $params["debug"] : false;
+        $this->_config['image_base_url'] = substr(Mage::app()->getStore($this->_id_store)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA,
+                false), 0, -1) . '/catalog/product';
+        $this->_config['force_type'] = array_key_exists('forced_type', $params) ? $params['forced_type'] : false;
+        $this->_config['product_status'] = array_key_exists('status', $params) ? $params['status'] : null;
+        $this->_config['product_ids'] = array_key_exists('product_ids', $params) ? $params['product_ids'] : false;
+        $this->_debug = array_key_exists('debug', $params) ? $params["debug"] : false;
 
-        $this->_config['offset'] = array_key_exists('offset',$params) ? $params['offset'] : false;
-        $this->_productLimit = array_key_exists('limit',$params) ? $params['limit'] : false;
-        if ($this->_config['product_status'] === null){
-            $this->_config['product_status'] = (string) $this->_config_model->get('global/productstatus');
-            if($this->_config['product_status'] === Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-                OR $this->_config['product_status'] === Mage_Catalog_Model_Product_Status::STATUS_DISABLED){
-                $this->_config['product_status'] =  $this->_config['product_status'];
-            }else{
-                $this->_config['product_status'] =  null;
+        $this->_config['offset'] = array_key_exists('offset', $params) ? $params['offset'] : false;
+        $this->_productLimit = array_key_exists('limit', $params) ? $params['limit'] : false;
+        if ($this->_config['product_status'] === null) {
+            $this->_config['product_status'] = (string)$this->_config_model->get('global/productstatus');
+            if ($this->_config['product_status'] === Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+                OR $this->_config['product_status'] === Mage_Catalog_Model_Product_Status::STATUS_DISABLED
+            ) {
+                $this->_config['product_status'] = $this->_config['product_status'];
+            } else {
+                $this->_config['product_status'] = null;
             }
         }
 
@@ -330,46 +339,46 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         $this->_config['attribute_html'] = !empty($attributes) ? explode(',', $attributes) : array();
         $this->_config['shipping_price'] = $this->_config_model->get('data/default_shipping_price', $this->_id_store);
 
-        $outOfStock = array_key_exists('out_of_stock',$params) ? $params['out_of_stock'] : null;
-        if ($outOfStock === null){
+        $outOfStock = array_key_exists('out_of_stock', $params) ? $params['out_of_stock'] : null;
+        if ($outOfStock === null) {
             $this->_config['out_of_stock'] = (int)$this->_config_model->get('global/export_soldout');
         }
 
-        $selectedProduct = array_key_exists('forced_type',$params) ? $params['selected_products'] : null;
-        if ($selectedProduct === null){
+        $selectedProduct = array_key_exists('forced_type', $params) ? $params['selected_products'] : null;
+        if ($selectedProduct === null) {
             $this->_config['only_selected_product'] = (int)$this->_config_model->onlySelectedProducts();
         }
-        if ($format === null){
+        if ($format === null) {
             $this->_fileFormat = $this->_config_model->get('data/format');
-        }else{
+        } else {
             $this->_fileFormat = $format;
         }
-        $this->_config['mode']  = array_key_exists('mode',$params) ? $params['mode'] : false;
+        $this->_config['mode'] = array_key_exists('mode', $params) ? $params['mode'] : false;
 
 
-        $stream = array_key_exists('stream',$params) ? $params['stream'] : null;
-        if ($stream === null){
+        $stream = array_key_exists('stream', $params) ? $params['stream'] : null;
+        if ($stream === null) {
             $this->_stream = $this->_config_model->get('performances/usesavefile') ? false : true;
+        } else {
+            $this->_stream = $stream;
         }
 
-        if ($this->_isAlreadyLaunch()){
+        if ($this->_isAlreadyLaunch()) {
             Mage::helper('lensync/data')->log('Feed already launch');
-
-            if(!$this->_stream) {
+            if (!$this->_stream) {
                 $this->_log('/!\ Feed already Launch');
             }
             exit();
         }
 
-        if(!$this->_stream) {
+        if (!$this->_stream) {
             header('Content-Type: text/html; charset=utf-8');
             $this->_log('Start Store = ' . Mage::app()->getStore($this->_id_store)->getName() . '(' . $this->_id_store . ')');
         }
 
-        if ($this->_config['mode'] == 'size'){
-
-            $this->_log('Total Products :'.$this->getTotalProductStore($this->_id_store));
-            $this->_log('Memory Usage '.(memory_get_usage()/1000000));
+        if ($this->_config['mode'] == 'size') {
+            $this->_log('Total Products :' . $this->getTotalProductStore($this->_id_store));
+            $this->_log('Memory Usage ' . (memory_get_usage() / 1000000));
             $this->_stop($this->_startScript, 'Execution time ');
             exit();
         }
@@ -377,50 +386,45 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         // Get products list to export
         $this->_getProductsCollection($format, $params);
 
-        if(!$this->_stream) {
-            $this->_log('Memory Usage '.(memory_get_usage()/1000000));
+        if (!$this->_stream) {
+            $this->_log('Memory Usage ' . (memory_get_usage() / 1000000));
             $this->_stop($this->_startScript, 'Execution time ');
         }
-
     }
 
     /**
      * Get Product Collection
      *
-     * @param varchar $mode               The mode of export
+     * @param varchar $mode The mode of export
      *                                        size : display only count of products to export
      *                                        full : export simple product + configured product
      *                                        xxx,yyy : export xxx type product + yyy type product
-     * @param varchar $format             Format of export
-     * @param array $params               Parameters
+     * @param varchar $format Format of export
+     * @param array $params Parameters
      *
      * @return float price
      */
-
-
     protected function _getProductsCollection($format, $params = array())
     {
-
         //$out_of_stock = array_key_exists('out_of_stock',$params) ? $params['out_of_stock'] : false;
-
 
         $this->_loadTaxes();
         $this->_loadSelectedAttributes();
         $this->_loadProductAttributes();
         $this->_loadProductAttributeValues();
+
         $this->_loadConfigurableProducts();
         $this->_loadImages();
         $this->_loadCategories();
         $this->_loadGroupedProducts();
         $this->_buildCsvHeader();
 
-
         $productCollection = $this->_getQuery();
 
         $tempProductCollection = clone $productCollection;
         $tempProductCollection->getSelect()->columns('COUNT(DISTINCT e.entity_id) As total');
         $nbProduct = $tempProductCollection->getFirstItem()->getTotal();
-        if ($this->_productLimit && $nbProduct > $this->_productLimit){
+        if ($this->_productLimit && $nbProduct > $this->_productLimit) {
             $nbProduct = $this->_productLimit;
         }
         $totalQueryToExecute = ceil($nbProduct / $this->_config['number_product_by_query']);
@@ -428,19 +432,19 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         $productCollection->getSelect()->group(array('e.entity_id'))->order('e.entity_id');
         $nbQueryExecuted = 0;
 
-        if ($this->_debug){
-            $this->_log('Total items calculated ('.$nbProduct.' in '.$totalQueryToExecute.' queries )');
+        if ($this->_debug) {
+            $this->_log('Total items calculated (' . $nbProduct . ' in ' . $totalQueryToExecute . ' queries )');
         }
         Mage::helper('lensync/data')->log('Find ' . $nbProduct . ' product' . ($nbProduct > 1 ? 's ' : ' '));
 
         $formatData = $this->_config_model->get('data/formatdata') == 1 ? true : false;
 
-
         $feed = Mage::getModel('Lengow_Export_Model_Feed_' . ucfirst($this->_fileFormat));
 
         // Get content type if streamed feed
-        if($this->_stream)
+        if ($this->_stream) {
             header('Content-Type: ' . $feed->getContentType() . '; charset=utf-8');
+        }
         $feed->setFields($this->_listHeaderCsvFile);
         $this->_write($feed->makeHeader());
 
@@ -449,21 +453,19 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         while ($nbQueryExecuted < $totalQueryToExecute) {
             $currentProductCollection = clone $productCollection;
 
-
-            if ($this->_config['offset']){
+            if ($this->_config['offset']) {
                 $offset = (int)$this->_config['offset'];
-            }else{
+            } else {
                 $offset = ($this->_config['number_product_by_query'] * $nbQueryExecuted);
             }
 
-            if ($this->_config['number_product_by_query']){
-                if ($this->_productLimit && $this->_config['number_product_by_query'] > $this->_productLimit){
+            if ($this->_config['number_product_by_query']) {
+                if ($this->_productLimit && $this->_config['number_product_by_query'] > $this->_productLimit) {
                     $currentProductCollection->getSelect()->limit($this->_productLimit, $offset);
-                }else{
+                } else {
                     $currentProductCollection->getSelect()->limit($this->_config['number_product_by_query'], $offset);
                 }
             }
-
 
             ++$nbQueryExecuted;
 
@@ -472,17 +474,15 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
             } else {
                 $totalOffset = $this->_config['number_product_by_query'] * $nbQueryExecuted;
             }
-            //if ($this->_debug){
-                $this->_log('Fetching products from ' . ($this->_config['number_product_by_query'] * ($nbQueryExecuted - 1) + 1) . ' to ' . $totalOffset);
-                //echo $currentProductCollection->getSelect();
-            //}
+
+            $this->_log('Fetching products from ' . ($this->_config['number_product_by_query'] * ($nbQueryExecuted - 1) + 1) . ' to ' . $totalOffset);
 
             foreach ($currentProductCollection as $product) {
                 ++$pi;
                 $data = array();
                 $data['type'] = $product->getTypeId();
-                foreach($this->_listAttributeToShow as $attributeToShow){
-                    switch($attributeToShow){
+                foreach ($this->_listAttributeToShow as $attributeToShow) {
+                    switch ($attributeToShow) {
                         case 'sku':
                             $data['sku'] = $product->getSku();
                             break;
@@ -491,7 +491,7 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                             break;
                         case 'qty':
                             //todo : what quantity for configurable / bundle product ???
-                            switch($product->getTypeId()){
+                            switch ($product->getTypeId()) {
                                 case 'grouped':
                                     $data['qty'] = (int)$this->_listGroupedProducts[$product->getId()]['qty'];
                                     break;
@@ -501,7 +501,7 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                             }
                             break;
                         case 'status':
-                            switch($product->getTypeId()){
+                            switch ($product->getTypeId()) {
                                 case 'grouped':
                                     $data['status'] = $this->_listGroupedProducts[$product->getId()]['status'];
                                     break;
@@ -513,69 +513,78 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                             break;
                         case 'categories':
                             $categoryTemp = array();
-                            if($product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE && isset($this->_listChildrenIds[$product->getId()])){
-                                $currentPathCategory = explode(',', $this->_listChildrenIds[$product->getId()]['categories_id']);
-                            }else{
+                            if ($product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE && isset($this->_listChildrenIds[$product->getId()])) {
+                                $currentPathCategory = explode(',',
+                                    $this->_listChildrenIds[$product->getId()]['categories_id']);
+                            } else {
                                 $currentPathCategory = explode(',', $product->getCategoriesIds());
                             }
-                            $currentCategoryId =  end($currentPathCategory);;
+                            $currentCategoryId = end($currentPathCategory);;
                             $i = 0;
-                            if (!$currentCategoryId){
+                            if (!$currentCategoryId) {
                                 $data['category'] = '';
                                 $data['category-url'] = '';
-                            }else{
+                            } else {
                                 $level = 0;
-                                foreach($currentPathCategory as $category){
-                                    if ($this->_listCategories[$category]['level'] > $level){
+                                foreach ($currentPathCategory as $category) {
+                                    if (isset($this->_listCategories[$category]['level']) &&
+                                        $this->_listCategories[$category]['level'] > $level) {
                                         $level = $this->_listCategories[$category]['level'];
                                         $currentCategoryId = $category;
                                     }
                                 }
-                                $fullPathCategory = explode('/', $this->_listCategories[$currentCategoryId]['path']);
-                                foreach ($fullPathCategory as $categoryId){
-                                    if($i == 0) { ++$i; continue; }
-                                    $categoryTemp[] = $this->_listCategories[$categoryId]['name'];
-
-                                    if($i == 1) {
-                                        $data['category'] = $this->_listCategories[$categoryId]['name'];
-                                        $data['category-url'] = $this->_listCategories[$categoryId]['url'];
-                                    } elseif($i <= $this->_config['category_max_level']) {
-                                        $data['category-sub-'.($i-1)] =  $this->_listCategories[$categoryId]['name'];
-                                        $data['category-url-sub-'.($i-1)] = $this->_listCategories[$categoryId]['url'];
+                                if (isset($this->_listCategories[$currentCategoryId])) {
+                                    $fullPathCategory = explode('/', $this->_listCategories[$currentCategoryId]['path']);
+                                    foreach ($fullPathCategory as $categoryId) {
+                                        if ($i == 0) {
+                                            ++$i;
+                                            continue;
+                                        }
+                                        $categoryTemp[] = $this->_listCategories[$categoryId]['name'];
+                                        if ($i == 1) {
+                                            $data['category'] = $this->_listCategories[$categoryId]['name'];
+                                            $data['category-url'] = $this->_listCategories[$categoryId]['url'];
+                                        } elseif ($i <= $this->_config['category_max_level']) {
+                                            $data['category-sub-' . ($i - 1)] = $this->_listCategories[$categoryId]['name'];
+                                            $data['category-url-sub-' . ($i - 1)] = $this->_listCategories[$categoryId]['url'];
+                                        }
+                                        ++$i;
                                     }
-                                    ++$i;
                                 }
                             }
                             for ($j = $i; $j <= $this->_config['category_max_level']; ++$j) {
-                                $data['category-sub-'.$j] =  '';
-                                $data['category-url-sub-'.$j] = '';
+                                $data['category-sub-' . $j] = '';
+                                $data['category-url-sub-' . $j] = '';
                             }
-
-                            $data['category_breadcrumb'] = join(' > ',$categoryTemp);
+                            $data['category_breadcrumb'] = join(' > ', $categoryTemp);
                             break;
                         case 'prices':
-                            if ($product->getIndexPrice()>0){
+                            if ($product->getIndexPrice() > 0) {
                                 $product["price"] = $product->getIndexPrice();
                             }
-                            if ($product->getIndexFinalPrice()>0){
+                            if ($product->getIndexFinalPrice() > 0) {
                                 $product["final_price"] = $product->getIndexFinalPrice();
                             }
-                            if ($product["final_price"]==0){
+                            if ($product["final_price"] == 0) {
                                 $product["final_price"] = $product["price"];
                             }
-                            switch($product->getTypeId()){
+                            switch ($product->getTypeId()) {
                                 case 'grouped':
-                                    $data["price_ttc"] = $this->_calculatePrice($this->_listGroupedProducts[$product->getId()]['price'], $product->getTaxClassId());
-                                    $data["price_before_discount"]  = $data["price_ttc"];
+                                    $data["price_ttc"] = $this->_calculatePrice($this->_listGroupedProducts[$product->getId()]['price'],
+                                        $product->getTaxClassId());
+                                    $data["price_before_discount"] = $data["price_ttc"];
                                     break;
                                 default:
-                                    $data["price_ttc"] = $this->_calculatePrice($product["final_price"], $product->getTaxClassId());
-                                    $data["price_before_discount"] = $this->_calculatePrice($product["price"], $product->getTaxClassId());
+                                    $data["price_ttc"] = $this->_calculatePrice($product["final_price"],
+                                        $product->getTaxClassId());
+                                    $data["price_before_discount"] = $this->_calculatePrice($product["price"],
+                                        $product->getTaxClassId());
                                     break;
                             }
-                            $discountAmount = ((float)$data["price_before_discount"]-(float)$data["price_ttc"]);
+                            $discountAmount = ((float)$data["price_before_discount"] - (float)$data["price_ttc"]);
                             $data['discount_amount'] = $discountAmount > 0 ? round($discountAmount, 2) : '0';
-                            $data['discount_percent'] = $discountAmount > 0 ? round(($discountAmount * 100) / (float)$data['price_before_discount'], 0) : '0';
+                            $data['discount_percent'] = $discountAmount > 0 ? round(($discountAmount * 100) / (float)$data['price_before_discount'],
+                                0) : '0';
                             $data['start_date_discount'] = $product->getSpecialFromDate();
                             $data['end_date_discount'] = $product->getSpecialToDate();
                             break;
@@ -584,20 +593,20 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                             $data['shipping_price'] = '';
                             $data['shipping_delay'] = $this->_config_model->get('data/default_shipping_delay');
                             $carrier = $this->_config_model->get('data/default_shipping_method');
-                            if ($carrier == 'flatrate_flatrate' || $carrier == ''){
+                            if ($carrier == 'flatrate_flatrate' || $carrier == '') {
                                 $data['shipping_name'] = 'Flatrate';
                                 $data['shipping_price'] = $this->_config['shipping_price'];
-                            }else{
-                                if(!empty($carrier)){
-                                    $carrierTab = explode('_',$carrier);
-                                    list($carrierCode,$methodCode) = $carrierTab;
+                            } else {
+                                if (!empty($carrier)) {
+                                    $carrierTab = explode('_', $carrier);
+                                    list($carrierCode, $methodCode) = $carrierTab;
                                     //todo : wrong shipping name ?
                                     $data['shipping_name'] = ucfirst($methodCode);
                                     $shippingPrice = 0;
                                     $countryCode = $this->_config_model->get('data/shipping_price_based_on');
 
                                     $shippingPrice = $product->_getShippingPrice($product, $carrier, $countryCode);
-                                    if(!$shippingPrice) {
+                                    if (!$shippingPrice) {
                                         $shippingPrice = $this->_config['shipping_price'];
                                     }
                                     $data['shipping_price'] = $shippingPrice;
@@ -606,90 +615,95 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                             break;
                         case 'images':
                             $max_image = $this->_config_model->getCountExportImages();
-                            for($i = 1; $i <= $max_image; ++$i) {
-                                $data['image-url-'.$i] = '';
+                            for ($i = 1; $i <= $max_image; ++$i) {
+                                $data['image-url-' . $i] = '';
                             }
 
-                            if (isset($this->_listImages[$product->getId()])){
+                            if (isset($this->_listImages[$product->getId()])) {
                                 $productImage = $this->_listImages[$product->getId()];
                                 $i = 1;
-                                foreach($productImage as $image){
-                                    if ($image['disabled']==0){
-                                        $data['image-url-' . $i] =  $this->_config['image_base_url'].$image['src'];
+                                foreach ($productImage as $image) {
+                                    if ($image['disabled'] == 0) {
+                                        $data['image-url-' . $i] = $this->_config['image_base_url'] . $image['src'];
                                         ++$i;
                                     }
                                 }
                                 for ($j = $i; $j < $max_image; ++$j) {
-                                    $data['image-url-'.$j] =  '';
+                                    $data['image-url-' . $j] = '';
                                 }
                             }
 
-                            if ($data['image-url-1']=='' && isset($this->_listChildrenIds[$product->getId()])){
-                                if (isset($this->_listImages[$this->_listChildrenIds[$product->getId()]['id']])){
-                                    foreach($this->_listImages[$this->_listChildrenIds[$product->getId()]['id']] as $img){
-                                        $data['image-url-1']  = $this->_config['image_base_url'].$img['src'];
+                            if ($data['image-url-1'] == '' && isset($this->_listChildrenIds[$product->getId()])) {
+                                if (isset($this->_listImages[$this->_listChildrenIds[$product->getId()]['id']])) {
+                                    foreach ($this->_listImages[$this->_listChildrenIds[$product->getId()]['id']] as $img) {
+                                        $data['image-url-1'] = $this->_config['image_base_url'] . $img['src'];
                                     }
                                 }
                             }
                             $data['image_default'] = $data['image-url-1'];
                             break;
                         case 'product_url':
-                            if($product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE && isset($this->_listChildrenIds[$product->getId()])) {
+                            if ($product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE && isset($this->_listChildrenIds[$product->getId()])) {
                                 $data['product_url'] = $this->_listChildrenIds[$product->getId()]['url'];
-                            }else{
-                                if ($product->getProductUrl() == "" && isset($this->_listChildrenIds[$product->getId()]['url'])){
+                            } else {
+                                if ($product->getProductUrl() == "" && isset($this->_listChildrenIds[$product->getId()]['url'])) {
                                     $data['product_url'] = $this->_listChildrenIds[$product->getId()]['url'];
-                                } else{
+                                } else {
                                     $data['product_url'] = $product->getProductUrl();
                                 }
                             }
                             break;
                         case 'name':
-                            if($product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE && isset($this->_listChildrenIds[$product->getId()])) {
-                                if ($this->_listChildrenIds[$product->getId()] !=''){
-                                    $data['name'] = $this->_helper->cleanData($this->_listChildrenIds[$product->getId()]['name'], $formatData, in_array('name', $this->_config['attribute_html']));
-                                }else{
-                                    $data['name'] = $this->_helper->cleanData($product->getName(), $formatData, in_array('name', $this->_config['attribute_html']));
+                            if ($product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE && isset($this->_listChildrenIds[$product->getId()])) {
+                                if ($this->_listChildrenIds[$product->getId()] != '') {
+                                    $data['name'] = $this->_helper->cleanData($this->_listChildrenIds[$product->getId()]['name'],
+                                        $formatData, in_array('name', $this->_config['attribute_html']));
+                                } else {
+                                    $data['name'] = $this->_helper->cleanData($product->getName(), $formatData,
+                                        in_array('name', $this->_config['attribute_html']));
                                 }
-                            }else{
-                                $data['name'] = $this->_helper->cleanData($product->getName(), $formatData, in_array('name', $this->_config['attribute_html']));
+                            } else {
+                                $data['name'] = $this->_helper->cleanData($product->getName(), $formatData,
+                                    in_array('name', $this->_config['attribute_html']));
                             }
                             break;
                         case 'description':
-                            $data['description'] = $this->_helper->cleanData($product->getDescription(), $formatData, in_array('description', $this->_config['attribute_html']));
+                            $data['description'] = $this->_helper->cleanData($product->getDescription(), $formatData,
+                                in_array('description', $this->_config['attribute_html']));
                             break;
                         case 'short_description':
-                            $data['short_description'] = $this->_helper->cleanData($product->getShortDescription(), $formatData, in_array('short_description', $this->_config['attribute_html']));
+                            $data['short_description'] = $this->_helper->cleanData($product->getShortDescription(),
+                                $formatData, in_array('short_description', $this->_config['attribute_html']));
                             break;
                         case 'parent_informations':
-                            if (isset($this->_listChildrenIds[$product->getId()])){
+                            if (isset($this->_listChildrenIds[$product->getId()])) {
                                 $data['parent_id'] = $this->_listChildrenIds[$product->getId()]['id'];
                                 $data['product_type'] = 'child';
                                 $data['child_name'] = $this->_listChildrenIds[$product->getId()]['name'];
-                                if (isset($this->_listConfigurableVariation[$this->_listChildrenIds[$product->getId()]['id']])){
+                                if (isset($this->_listConfigurableVariation[$this->_listChildrenIds[$product->getId()]['id']])) {
                                     $variation = array();
-                                    foreach($this->_listConfigurableVariation[$this->_listChildrenIds[$product->getId()]['id']] as $variationAttributeId){
+                                    foreach ($this->_listConfigurableVariation[$this->_listChildrenIds[$product->getId()]['id']] as $variationAttributeId) {
                                         $variation[] = $this->_listCodeAttributes[$variationAttributeId]['frontend_label'];
                                     }
                                     $data['product_variation'] = join(',', $variation);
-                                }else{
+                                } else {
                                     $data['product_variation'] = '';
                                 }
-                            }else{
-                                if (isset($this->_listParentIds[$product->getId()])){
+                            } else {
+                                if (isset($this->_listParentIds[$product->getId()])) {
                                     $data['parent_id'] = '';
                                     $data['product_type'] = 'parent';
                                     $data['child_name'] = $product->getName();
-                                    if (isset($this->_listConfigurableVariation[$product->getId()])){
+                                    if (isset($this->_listConfigurableVariation[$product->getId()])) {
                                         $variation = array();
-                                        foreach($this->_listConfigurableVariation[$product->getId()] as $variationAttributeId){
+                                        foreach ($this->_listConfigurableVariation[$product->getId()] as $variationAttributeId) {
                                             $variation[] = $this->_listCodeAttributes[$variationAttributeId]['frontend_label'];
                                         }
                                         $data['product_variation'] = join(',', $variation);
-                                    }else{
+                                    } else {
                                         $data['product_variation'] = '';
                                     }
-                                }else{
+                                } else {
                                     $data['parent_id'] = '';
                                     $data['product_type'] = 'simple';
                                     $data['child_name'] = $product->getName();
@@ -699,12 +713,15 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                             break;
                     }
                 }
-                foreach($this->_attributesAdditional as $attributeCode){
+                foreach ($this->_attributesAdditional as $attributeCode) {
                     if (!isset($data[$attributeCode])) {
                         if (!in_array($attributeCode, $this->_listForbiddenAttributes)) {
-                            if (in_array($this->_listCodeAttributes[$this->_listAttributeCode[$attributeCode]]['backend_type'], array('text','varchar'))){
-                                $data[$attributeCode] = $this->_helper->cleanData($this->_getAttributeValue($product->getId(), $attributeCode), $formatData, in_array($attributeCode, $this->_config['attribute_html']));
-                            }else{
+                            if (in_array($this->_listCodeAttributes[$this->_listAttributeCode[$attributeCode]]['backend_type'],
+                                array('text', 'varchar'))) {
+                                $data[$attributeCode] = $this->_helper->cleanData($this->_getAttributeValue($product->getId(),
+                                    $attributeCode), $formatData,
+                                    in_array($attributeCode, $this->_config['attribute_html']));
+                            } else {
                                 $data[$attributeCode] = $this->_getAttributeValue($product->getId(), $attributeCode);
                             }
                         } else {
@@ -712,49 +729,48 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                         }
                     }
                 }
-                //print_r($data);
 
-                if ($pi >= $nbProduct)
+                if ($pi >= $nbProduct) {
                     $this->_write($feed->makeData($data, array('last' => true)));
-                else
+                } else {
                     $this->_write($feed->makeData($data));
-                
+                }
                 unset($data);
             }
         }
 
         $this->_write($feed->makeFooter());
-        if(!$this->_stream) {
+        if (!$this->_stream) {
             flush();
             $this->_copyFile();
             $store_code = Mage::app()->getStore($this->_id_store)->getCode();
             $url_file = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'lengow' . DS . $store_code . DS . $this->_fileName . '.' . $this->_fileFormat;
-            $this->_log($this->_helper->__('Your feed is available here : %s' , '<a href=\'' . $url_file . '\'>' . $url_file . '</a>'));
+            $this->_log($this->_helper->__('Your feed is available here : %s',
+                '<a href=\'' . $url_file . '\'>' . $url_file . '</a>'));
             Mage::helper('lensync/data')->log('Export of the store ' . Mage::app()->getStore($this->_id_store)->getName() . '(' . $this->_id_store . ') generated a file here : ' . $url_file);
         }
 
     }
 
-
-    protected function _buildCsvHeader(){
-
+    protected function _buildCsvHeader()
+    {
         $tmpHeader = $this->_listHeaderCsvFile;
         $this->_listHeaderCsvFile = array();
-        foreach($tmpHeader as $header){
-            switch($header){
+        foreach ($tmpHeader as $header) {
+            switch ($header) {
                 case 'lengow_categories_header':
                     $this->_listHeaderCsvFile[] = 'category';
                     $this->_listHeaderCsvFile[] = 'category-url';
                     for ($j = 1; $j <= $this->_config['category_max_level']; ++$j) {
-                        $this->_listHeaderCsvFile[] = 'category-sub-'.$j;
-                        $this->_listHeaderCsvFile[] = 'category-url-sub-'.$j;
+                        $this->_listHeaderCsvFile[] = 'category-sub-' . $j;
+                        $this->_listHeaderCsvFile[] = 'category-url-sub-' . $j;
                     }
                     $this->_listHeaderCsvFile[] = 'category_breadcrumb';
                     break;
                 case 'lengow_images_header':
                     $max_image = $this->_config_model->getCountExportImages();
-                    for($i = 1; $i <= $max_image; ++$i) {
-                        $this->_listHeaderCsvFile[]= 'image-url-'.$i;
+                    for ($i = 1; $i <= $max_image; ++$i) {
+                        $this->_listHeaderCsvFile[] = 'image-url-' . $i;
                     }
                     break;
                 default:
@@ -762,12 +778,11 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                     break;
             }
         }
-        foreach($this->_attributesAdditional as $header){
+        foreach ($this->_attributesAdditional as $header) {
             $this->_listHeaderCsvFile[] = $header;
         }
 
     }
-
 
     /**
      * Set stock on query
@@ -775,31 +790,33 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return object $productCollection
      */
-
-    protected function _joinStock($productCollection){
+    protected function _joinStock($productCollection)
+    {
         if (!$this->_config['out_of_stock']) {
             $conditions = ' AND ((stock.is_in_stock = 1) '
                 . ' OR (IF(stock.use_config_manage_stock = 1,
             ' . (int)Mage::getStoreConfigFlag(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_MANAGE_STOCK) . ',
             stock.manage_stock) = 0))  AND is_in_stock IS NOT NULL';
 
-            $productCollection->getSelect()->join($this->_table['cataloginventory_stock_item'] . ' AS stock', 'stock.product_id=e.entity_id ' . $conditions, array(
-                'qty' => 'qty',
-                'is_in_stock' => 'is_in_stock',
-                'manage_stock' => 'manage_stock',
-                'use_config_manage_stock' => 'use_config_manage_stock',
-                'backorders' => 'backorders',
-                'use_config_backorders' => 'use_config_backorders'
-            ));
-        }else{
-            $productCollection->getSelect()->joinLeft($this->_table['cataloginventory_stock_item'] . ' AS stock', 'stock.product_id=e.entity_id ', array(
-                'qty' => 'qty',
-                'is_in_stock' => 'is_in_stock',
-                'manage_stock' => 'manage_stock',
-                'use_config_manage_stock' => 'use_config_manage_stock',
-                'backorders' => 'backorders',
-                'use_config_backorders' => 'use_config_backorders'
-            ));
+            $productCollection->getSelect()->join($this->_table['cataloginventory_stock_item'] . ' AS stock',
+                'stock.product_id=e.entity_id ' . $conditions, array(
+                    'qty' => 'qty',
+                    'is_in_stock' => 'is_in_stock',
+                    'manage_stock' => 'manage_stock',
+                    'use_config_manage_stock' => 'use_config_manage_stock',
+                    'backorders' => 'backorders',
+                    'use_config_backorders' => 'use_config_backorders'
+                ));
+        } else {
+            $productCollection->getSelect()->joinLeft($this->_table['cataloginventory_stock_item'] . ' AS stock',
+                'stock.product_id=e.entity_id ', array(
+                    'qty' => 'qty',
+                    'is_in_stock' => 'is_in_stock',
+                    'manage_stock' => 'manage_stock',
+                    'use_config_manage_stock' => 'use_config_manage_stock',
+                    'backorders' => 'backorders',
+                    'use_config_backorders' => 'use_config_backorders'
+                ));
         }
         return $productCollection;
     }
@@ -809,9 +826,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadImages(){
-
+    protected function _loadImages()
+    {
         $connection = $this->_coreResource->getConnection('core_read');
 
         $query = $connection->select(array('DISTINCT value'));
@@ -826,13 +842,12 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         $this->_listImages = array();
         foreach ($rows as $row) {
             if ($row['disabled'] != 1 && $row['value'] != '') {
-                $this->_listImages[$row['entity_id']][] = array('src' => $row['value'], 'disabled' => $row['disabled']) ;
+                $this->_listImages[$row['entity_id']][] = array('src' => $row['value'], 'disabled' => $row['disabled']);
             }
         }
 
-        if ($this->_debug){
-            $this->_log('Load Images ('.count($this->_listImages).')');
-            //print_r($this->_listImages);
+        if ($this->_debug) {
+            $this->_log('Load Images (' . count($this->_listImages) . ')');
         }
     }
 
@@ -841,11 +856,11 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadCategories(){
+    protected function _loadCategories()
+    {
         $categories = Mage::getModel('catalog/category')->getCollection()
             ->setStoreId($this->_id_store)
-            ->addAttributeToSelect('name','store_id')
+            ->addAttributeToSelect('name', 'store_id')
             ->addAttributeToSelect('is_active')
             ->addAttributeToSelect('include_in_menu');
         $this->_listCategories = array();
@@ -856,9 +871,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
             $this->_listCategories[$category->getId()]['url'] = $category->getUrl();
         }
 
-        if ($this->_debug){
-            $this->_log('Load Categories ('.count($this->_listCategories).')');
-            //print_r($this->_listCategories);
+        if ($this->_debug) {
+            $this->_log('Load Categories (' . count($this->_listCategories) . ')');
         }
     }
 
@@ -869,13 +883,12 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadGroupedProducts(){
-
+    protected function _loadGroupedProducts()
+    {
         $productCollection = Mage::getModel('lenexport/product_collection')->getCollection()->addStoreFilter($this->_id_store);
         $productCollection->addAttributeToFilter('type_id', array('in' => 'grouped'));
-        $productCollection->addAttributeToSelect('name','product_url');
-        if ($this->_config['product_status'] !== null){
+        $productCollection->addAttributeToSelect('name', 'product_url');
+        if ($this->_config['product_status'] !== null) {
             $productCollection->addAttributeToFilter('status', array('eq' => $this->_config['product_status']));
         }
         $productCollection->getSelect()->joinLeft($this->_table['catalog_product_link'] . ' AS cpl',
@@ -885,12 +898,13 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
             'stock.product_id=cpl.linked_product_id',
             array('child_qtys' => 'GROUP_CONCAT( qty)'));
         $productCollection->getSelect()->joinLeft($this->_table['catalog_product_entity_int'] . ' AS entity_int',
-            'entity_int.entity_id=cpl.linked_product_id AND entity_int.attribute_id ='.$this->_attributeStatusId ,
+            'entity_int.entity_id=cpl.linked_product_id AND entity_int.attribute_id =' . $this->_attributeStatusId,
             array('child_status' => 'GROUP_CONCAT( entity_int.value)'));
         $productCollection->getSelect()->joinLeft($this->_table['catalog_product_index_price'] . ' AS price_index',
             'price_index.entity_id=cpl.linked_product_id AND customer_group_id=0 AND price_index.website_id=' . $this->_websiteId,
             array('child_prices' => 'GROUP_CONCAT( final_price )'));
-        $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product'] . ' AS categories', 'categories.product_id=e.entity_id');
+        $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product'] . ' AS categories',
+            'categories.product_id=e.entity_id');
         $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product_index'] . ' AS categories_index',
             '((categories_index.category_id=categories.category_id AND categories_index.product_id=categories.product_id) ) AND categories_index.store_id=' . $this->_id_store,
             array('categories_ids' => 'GROUP_CONCAT(DISTINCT categories_index.category_id)'));
@@ -915,10 +929,13 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                 $quantities[] = $qty >= 0 ? $qty : 0;
             }
             foreach (explode(',', $product->getChildStatus()) as $status) {
-                if ($status==0){ $status = false; break; }
+                if ($status == 0) {
+                    $status = false;
+                    break;
+                }
             }
             foreach (explode(',', $product->getChildPrices()) as $price) {
-                $totalPrice+=$price;
+                $totalPrice += $price;
             }
             //keep the minimum quantity of product
             $this->_listGroupedProducts[$product->getId()]['qty'] = min($quantities);
@@ -926,10 +943,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
             $this->_listGroupedProducts[$product->getId()]['price'] = $totalPrice;
         }
 
-        if ($this->_debug){
-            $this->_log('Load Grouped ('.count($this->_listGroupedProducts).')');
-            //print_r($this->_listGroupedProducts);
-            //print_r($this->_listParentIds);
+        if ($this->_debug) {
+            $this->_log('Load Grouped (' . count($this->_listGroupedProducts) . ')');
         }
     }
 
@@ -939,53 +954,61 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadConfigurableProducts(){
-
+    protected function _loadConfigurableProducts()
+    {
         $connection = $this->_coreResource->getConnection('core_read');
-        $query = 'SELECT * FROM '.$this->_table['catalog_product_super_attribute'];
+        $query = 'SELECT * FROM ' . $this->_table['catalog_product_super_attribute'];
 
         $configurableAttributeCollection = $connection->fetchAll($query);
-        foreach($configurableAttributeCollection as $sa){
+        foreach ($configurableAttributeCollection as $sa) {
             $this->_listConfigurableVariation[$sa['product_id']][] = $sa['attribute_id'];
         }
 
-        $productCollection = Mage::getModel('lenexport/product_collection')->getCollection()->addStoreFilter($this->_id_store);
-        $productCollection->addAttributeToFilter('type_id', array('in' => 'configurable'));
-        $productCollection->addAttributeToSelect('name');
-        if ($this->_config['product_status'] !== null){
-            $productCollection->addAttributeToFilter('status', array('eq' => $this->_config['product_status']));
-        }
-        $productCollection->getSelect()->joinLeft($this->_table['catalog_product_super_link'] . ' AS sl',
-            'sl.parent_id=e.entity_id',
-            array('child_ids' => 'GROUP_CONCAT( sl.product_id)'));
-        $productCollection->getSelect()->joinLeft($this->_table['catalog_product_entity_int'] . ' AS entity_int',
-            'sl.parent_id=entity_int.entity_id AND entity_int.attribute_id = '.$this->_attributeStatusId,
-            array('child_statuses' => 'GROUP_CONCAT( entity_int.value)'));
-        $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product'] . ' AS categories', 'categories.product_id=e.entity_id');
-        $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product_index'] . ' AS categories_index',
-            '((categories_index.category_id=categories.category_id AND categories_index.product_id=categories.product_id) ) AND categories_index.store_id=' . $this->_id_store,
-            array('categories_ids' => 'GROUP_CONCAT(DISTINCT categories_index.category_id)'));
+        $perPage = 1000;
 
-        $productCollection->getSelect()->joinLeft($this->_table['core_url_rewrite'] . ' AS url',
-            'url.product_id=e.entity_id AND url.target_path NOT LIKE "category%" AND is_system=1 AND ' . $this->_config["query_url_option"] . ' AND url.store_id=' . $this->_id_store,
-            array('request_path' => 'MAX(DISTINCT request_path)'));
+        $query = 'SELECT COUNT(*) as total FROM '.$this->_table['catalog_product_entity'].' WHERE type_id = "configurable" ';
+        $totalQuery = $connection->fetchRow($query);
+        $total = $totalQuery["total"];
+        $nbPage = ceil($total / $perPage);
+        for ($i = 1; $i <= $nbPage; $i++) {
+            $productCollection = Mage::getModel('lenexport/product_collection')->getCollection()->addStoreFilter($this->_id_store);
+            $productCollection->addAttributeToFilter('type_id', array('in' => 'configurable'));
+            $productCollection->addAttributeToSelect('name');
+            if ($this->_config['product_status'] !== null) {
+                $productCollection->addAttributeToFilter('status', array('eq' => $this->_config['product_status']));
+            }
+            $productCollection->getSelect()->joinLeft($this->_table['catalog_product_super_link'] . ' AS sl',
+                'sl.parent_id=e.entity_id',
+                array('child_ids' => 'GROUP_CONCAT( sl.product_id)'));
+            $productCollection->getSelect()->joinLeft($this->_table['catalog_product_entity_int'] . ' AS entity_int',
+                'sl.parent_id=entity_int.entity_id AND entity_int.attribute_id = ' . $this->_attributeStatusId,
+                array('child_statuses' => 'GROUP_CONCAT( entity_int.value)'));
+            $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product'] . ' AS categories',
+                'categories.product_id=e.entity_id');
+            $productCollection->getSelect()->joinLeft($this->_table['catalog_category_product_index'] . ' AS categories_index',
+                '((categories_index.category_id=categories.category_id AND categories_index.product_id=categories.product_id) ) AND categories_index.store_id=' . $this->_id_store,
+                array('categories_ids' => 'GROUP_CONCAT(DISTINCT categories_index.category_id)'));
 
-        $productCollection->getSelect()->group(array('sl.parent_id'));
+            $productCollection->getSelect()->joinLeft($this->_table['core_url_rewrite'] . ' AS url',
+                'url.product_id=e.entity_id AND url.target_path NOT LIKE "category%" AND is_system=1 AND ' . $this->_config["query_url_option"] . ' AND url.store_id=' . $this->_id_store,
+                array('request_path' => 'MAX(DISTINCT request_path)'));
 
-        foreach ($productCollection as $product) {
-            $this->_listParentIds[$product->getId()] = true;
-            $name = $product->getName();
-            $categoriesId = $product->getCategoriesIds();
-            $url = $product->getProductUrl();
+            $productCollection->getSelect()->group(array('sl.parent_id'));
+            $productCollection->getSelect()->limit($perPage, ($i-1)*$perPage);
 
-            foreach (explode(',', $product->getChildIds()) as $id) {
-                $this->_listChildrenIds[$id] = array(
-                    'name' => $name,
-                    'id' => $product->getId(),
-                    'categories_id' => $categoriesId,
-                    'url' => $url,
-                );
+            foreach ($productCollection as $product) {
+                $this->_listParentIds[$product->getId()] = true;
+                $name = $product->getName();
+                $categoriesId = $product->getCategoriesIds();
+                $url = $product->getProductUrl();
+
+                foreach (explode(',', $product->getChildIds()) as $id) {
+                    $this->_listChildrenIds[$id] = array(
+                        'name' => $name,
+                        'id' => $product->getId(),
+                        'categories_id' => $categoriesId,
+                        'url' => $url,
+                    );
 //                foreach (explode(',', $product->getPrice()) as $price) {
 //                    $this->_listChildrenIds[$id]['price'] = $price;
 //                    break;
@@ -994,13 +1017,12 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
 //                    $this->_listChildrenIds[$id]['final_price'] = $price;
 //                    break;
 //                }
+                }
             }
         }
 
-        if ($this->_debug){
+        if ($this->_debug) {
             $this->_log('Load Configurable');
-            //print_r($this->_listParentIds);
-            //print_r($this->_listChildrenIds);
         }
     }
 
@@ -1011,10 +1033,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadTaxes(){
-
-
+    protected function _loadTaxes()
+    {
         $taxCalculation = Mage::getModel('tax/calculation');
         $request = $taxCalculation->getRateRequest(null, null, null, $this->_id_store);
 
@@ -1022,11 +1042,14 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
 
         $query = $connection->select();
         $query->from($this->_table['tax_class'])->order(array('class_id', 'tax_calculation_rate_id'));
-        $query->joinleft(array('tc' => $this->_table['tax_calculation']), 'tc.product_tax_class_id = ' . $this->_table['tax_class']. '.class_id',
+        $query->joinleft(array('tc' => $this->_table['tax_calculation']),
+            'tc.product_tax_class_id = ' . $this->_table['tax_class'] . '.class_id',
             'tc.tax_calculation_rate_id');
-        $query->joinleft(array('tcr' => $this->_table['tax_calculation_rate']), 'tcr.tax_calculation_rate_id = tc.tax_calculation_rate_id',
+        $query->joinleft(array('tcr' => $this->_table['tax_calculation_rate']),
+            'tcr.tax_calculation_rate_id = tc.tax_calculation_rate_id',
             array('tcr.rate', 'tax_country_id', 'tax_region_id'));
-        $query->joinleft(array('dcr' => $this->_table['directory_country_region']), 'dcr.region_id=tcr.tax_region_id', 'code');
+        $query->joinleft(array('dcr' => $this->_table['directory_country_region']), 'dcr.region_id=tcr.tax_region_id',
+            'code');
         $query->joinInner(array('cg' => $this->_table['customer_group']),
             'cg.tax_class_id=tc.customer_tax_class_id AND cg.customer_group_code=\'NOT LOGGED IN\'');
         $taxCollection = $connection->fetchAll($query);
@@ -1040,19 +1063,18 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
                 ++$classValue;
             }
             $tempClassId = $tax['class_id'];
-            if ($request['country_id'] == $tax['tax_country_id']){
+            if ($request['country_id'] == $tax['tax_country_id']) {
                 $this->_listTaxes[$tax['class_id']] = $tax['rate'];
                 //$this->_listTaxes[$tax['class_id']][$classValue]['code'] = $tax['code'];
                 //$this->_listTaxes[$tax['class_id']][$classValue]['country'] = $tax['tax_country_id'];
             }
         }
-        if ($this->_debug){
-            $this->_log('Load Tax Class ('.count($this->_listTaxes).')');
-            //print_r($this->_listTaxes);
+        if ($this->_debug) {
+            $this->_log('Load Tax Class (' . count($this->_listTaxes) . ')');
         }
 
-        if (count($this->_listTaxes)==0){
-            Mage::helper('lensync/data')->log('Tax configuration is not correct, please enable country : '.$request['country_id']);
+        if (count($this->_listTaxes) == 0) {
+            Mage::helper('lensync/data')->log('Tax configuration is not correct, please enable country : ' . $request['country_id']);
         }
     }
 
@@ -1062,20 +1084,21 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadSelectedAttributes(){
+    protected function _loadSelectedAttributes()
+    {
         $attributeToExport = $this->_config_model->getMappingAllAttributes($this->_id_store);
 
-        foreach($attributeToExport as $key => $value){
-            if ($key == 'none') { continue; }
-            if (!in_array($key, $this->_attributes)){
+        foreach ($attributeToExport as $key => $value) {
+            if ($key == 'none') {
+                continue;
+            }
+            if (!in_array($key, $this->_attributes)) {
                 $this->_attributesAdditional[] = $key;
             }
         }
 
-        if ($this->_debug){
-            $this->_log('Load New Attributes ('.count($attributeToExport).')');
-            //print_r($this->_attributes);
+        if ($this->_debug) {
+            $this->_log('Load New Attributes (' . count($attributeToExport) . ')');
         }
 
     }
@@ -1092,9 +1115,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadProductAttributes(){
-
+    protected function _loadProductAttributes()
+    {
         $attributeCollection = Mage::getResourceModel('eav/entity_attribute_collection')
             ->setEntityTypeFilter($this->_catalogProductEntityId)
             ->addSetInfo()
@@ -1112,9 +1134,8 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
 
         $findDiff = array_diff($this->_attributes, $listAttributes);
         $this->_attributes = array_diff($this->_attributes, $findDiff);
-        if ($this->_debug){
-            $this->_log('Load Attributes ('.count($this->_listCodeAttributes).')');
-            //print_r($this->_listCodeAttributes);
+        if ($this->_debug) {
+            $this->_log('Load Attributes (' . count($this->_listCodeAttributes) . ')');
         }
     }
 
@@ -1125,38 +1146,38 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadOptionValues(){
+    protected function _loadOptionValues()
+    {
         $attributeIdToQuery = array();
-        foreach($this->_listCodeAttributes as $codeAttribute){
-            if ( in_array($codeAttribute['frontend_input'], array('select','multiselect') )){
+        foreach ($this->_listCodeAttributes as $codeAttribute) {
+            if (in_array($codeAttribute['frontend_input'], array('select', 'multiselect'))) {
                 $attributeIdToQuery[] = $codeAttribute['attribute_id'];
             }
         }
 
-        if (count($attributeIdToQuery)){
+        if (count($attributeIdToQuery)) {
             $connection = $this->_coreResource->getConnection('core_read');
-            $query = 'SELECT * FROM '.$this->_table['eav_attribute_option'].' eavo
-            LEFT JOIN '.$this->_table['eav_attribute_option_value'].' eavov ON ( eavo.option_id = eavov.option_id )
-            WHERE eavo.attribute_id IN ('.join(',',$attributeIdToQuery).') AND eavov.store_id = 0';
+            $query = 'SELECT * FROM ' . $this->_table['eav_attribute_option'] . ' eavo
+            LEFT JOIN ' . $this->_table['eav_attribute_option_value'] . ' eavov ON ( eavo.option_id = eavov.option_id )
+            WHERE eavo.attribute_id IN (' . join(',', $attributeIdToQuery) . ') AND eavov.store_id = 0';
             $entityOptionValueCollection = $connection->fetchAll($query);
-            foreach($entityOptionValueCollection as $optionValue){
+            foreach ($entityOptionValueCollection as $optionValue) {
                 $this->_listOptionValues[$optionValue['attribute_id']][$optionValue['option_id']] = $optionValue['value'];
             }
 
             $connection = $this->_coreResource->getConnection('core_read');
-            $query = 'SELECT * FROM '.$this->_table['eav_attribute_option'].' eavo
-            LEFT JOIN '.$this->_table['eav_attribute_option_value'].' eavov ON ( eavo.option_id = eavov.option_id )
-            WHERE eavo.attribute_id IN ('.join(',',$attributeIdToQuery).') AND eavov.store_id = '.$this->_id_store;
+            $query = 'SELECT * FROM ' . $this->_table['eav_attribute_option'] . ' eavo
+            LEFT JOIN ' . $this->_table['eav_attribute_option_value'] . ' eavov ON ( eavo.option_id = eavov.option_id )
+            WHERE eavo.attribute_id IN (' . join(',',
+                    $attributeIdToQuery) . ') AND eavov.store_id = ' . $this->_id_store;
             $entityOptionValueCollection = $connection->fetchAll($query);
-            foreach($entityOptionValueCollection as $optionValue){
+            foreach ($entityOptionValueCollection as $optionValue) {
                 $this->_listOptionValues[$optionValue['attribute_id']][$optionValue['option_id']] = $optionValue['value'];
             }
         }
 
-        if ($this->_debug){
-            $this->_log('Load Option Values ('.count($this->_listOptionValues).')');
-            //print_r($this->_listOptionValues);
+        if ($this->_debug) {
+            $this->_log('Load Option Values (' . count($this->_listOptionValues) . ')');
         }
     }
 
@@ -1167,130 +1188,143 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-
-    protected function _loadProductAttributeValues(){
-
-        $this->_loadOptionValues();
-        $this->_loadAttributeValuesByType('int', $this->_table['catalog_product_entity_int']);
-        $this->_loadAttributeValuesByType('varchar', $this->_table['catalog_product_entity_varchar']);
-        $this->_loadAttributeValuesByType('datetime', $this->_table['catalog_product_entity_datetime']);
-        $this->_loadAttributeValuesByType('text', $this->_table['catalog_product_entity_text']);
-        $this->_loadAttributeValuesByType('decimal', $this->_table['catalog_product_entity_decimal']);
-
-        if ($this->_debug){
-            $this->_log('Load Attributes Values ('.count($this->_listAttributeValues).')');
-            //print_r($this->_listCodeAttributes);
-        }
-
+    protected function _loadProductAttributeValues()
+    {
+            $this->_loadOptionValues();
+            $this->_loadAttributeValuesByType('int', $this->_table['catalog_product_entity_int']);
+            $this->_loadAttributeValuesByType('varchar', $this->_table['catalog_product_entity_varchar']);
+            $this->_loadAttributeValuesByType('datetime', $this->_table['catalog_product_entity_datetime']);
+            $this->_loadAttributeValuesByType('text', $this->_table['catalog_product_entity_text']);
+            $this->_loadAttributeValuesByType('decimal', $this->_table['catalog_product_entity_decimal']);
+            if ($this->_debug) {
+                $this->_log('Load Attributes Values (' . count($this->_listAttributeValues) . ')');
+            }
     }
 
     /**
      * Load attributes values for all entities by type
      *
-     * @param string $type           Entity Type (int/varchar/text/decimal/float)
-     * @param string $tableName      Table Name by Entity Type
+     * @param string $type Entity Type (int/varchar/text/decimal/float)
+     * @param string $tableName Table Name by Entity Type
      *
      * @return void
      */
-
-    protected function _loadAttributeValuesByType($type, $tableName){
+    protected function _loadAttributeValuesByType($type, $tableName)
+    {
         $connection = $this->_coreResource->getConnection('core_read');
 
         $attributeIdToQuery = array();
-        foreach($this->_listCodeAttributes as $codeAttribute){
-            if ($codeAttribute['backend_type'] == $type){
+        foreach ($this->_listCodeAttributes as $codeAttribute) {
+            if ($codeAttribute['backend_type'] == $type) {
                 //load only selected attributes
-                if (in_array($codeAttribute['attribute_code'], $this->_attributesAdditional)){
+                if (in_array($codeAttribute['attribute_code'], $this->_attributesAdditional)) {
                     $attributeIdToQuery[] = $codeAttribute['attribute_id'];
                 }
             }
         }
 
-        if ($this->_config['product_ids']){
-            $sqlWhere = ' AND entity_id IN ('.$this->_config['product_ids'].') ';
-        }else{
+        if ($this->_config['product_ids']) {
+            $sqlWhere = ' AND entity_id IN (' . $this->_config['product_ids'] . ') ';
+        } else {
             $sqlWhere = '';
         }
 
-        if (count($attributeIdToQuery)>0){
-            $query = 'SELECT attribute_id, value, entity_id FROM '.$tableName.' WHERE attribute_id IN ('.join(',',$attributeIdToQuery).') AND store_id = 0 '.$sqlWhere;
-            $entityIntCollection = $connection->fetchAll($query);
-            foreach($entityIntCollection as $int){
-                if ($int['value']==''){
-                    $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = '';
-                }else{
-                    if ($this->_listCodeAttributes[$int['attribute_id']]['frontend_input'] == 'select' && $this->_listCodeAttributes[$int['attribute_id']]['backend_type'] == 'int'){
-                        if (isset($this->_listOptionValues[$int['attribute_id']][$int['value']])){
-                            $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] =  $this->_listOptionValues[$int['attribute_id']][$int['value']] ;
-                        }else{
-                            $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] =  $int['value'];
+        $perPage = 20000;
+        if (count($attributeIdToQuery) > 0) {
+            $query = 'SELECT COUNT(*) as total FROM ' . $tableName . ' WHERE attribute_id IN (' . join(',',
+                    $attributeIdToQuery) . ') AND store_id = 0 ' . $sqlWhere;
+
+            $totalQuery = $connection->fetchRow($query);
+            $total = $totalQuery["total"];
+            $nbPage = ceil($total / $perPage);
+            for ($i = 1; $i <= $nbPage; $i++) {
+                $query = 'SELECT '.$tableName.'.attribute_id, '.$tableName.'.value, '.$tableName.'.entity_id
+                FROM ' . $tableName . ' WHERE '.$tableName.'.attribute_id IN (' . join(',',
+                        $attributeIdToQuery) . ') AND '.$tableName.'.store_id = 0 ' . $sqlWhere.' LIMIT '.(($i-1)*$perPage).','.$perPage;
+                $entityIntCollection = $connection->fetchAll($query);
+                foreach ($entityIntCollection as $int) {
+                    if ($int['value'] == '') {
+                        $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = '';
+                    } else {
+                        if ($this->_listCodeAttributes[$int['attribute_id']]['frontend_input'] == 'select' && $this->_listCodeAttributes[$int['attribute_id']]['backend_type'] == 'int') {
+                            if (isset($this->_listOptionValues[$int['attribute_id']][$int['value']])) {
+                                $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = $this->_listOptionValues[$int['attribute_id']][$int['value']];
+                            } else {
+                                $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = $int['value'];
+                            }
+                        } else {
+                            $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = $int['value'];
                         }
-                    }else{
-                        $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] =  $int['value'];
                     }
                 }
             }
-            $query = 'SELECT attribute_id, value, entity_id FROM '.$tableName.' WHERE attribute_id IN ('.join(',',$attributeIdToQuery).') AND store_id = '.$this->_id_store.' '.$sqlWhere;
-            $entityIntCollection = $connection->fetchAll($query);
-            foreach($entityIntCollection as $int){
-                if ($int['value']==''){
-                    $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = '';
-                }else{
-                    if ($this->_listCodeAttributes[$int['attribute_id']]['frontend_input'] == 'select' && $this->_listCodeAttributes[$int['attribute_id']]['backend_type'] == 'int'){
-                        if (isset($this->_listOptionValues[$int['attribute_id']][$int['value']])){
-                            $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] =  $this->_listOptionValues[$int['attribute_id']][$int['value']] ;
-                        }else{
-                            $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] =  $int['value'];
+            $query = 'SELECT COUNT(*) as total FROM ' . $tableName . ' WHERE attribute_id IN (' . join(',',
+                    $attributeIdToQuery) . ') AND store_id = '.$this->_id_store.' ' . $sqlWhere;
+            $totalQuery = $connection->fetchRow($query);
+            $total = $totalQuery["total"];
+            $nbPage = ceil($total / $perPage);
+            for ($i = 1; $i <= $nbPage; $i++) {
+                $query = 'SELECT attribute_id, value, entity_id FROM ' . $tableName . ' WHERE attribute_id IN (' . join(',',
+                        $attributeIdToQuery) . ') AND store_id = ' . $this->_id_store . ' ' . $sqlWhere . ' LIMIT ' . (($i - 1) * $perPage) . ',' . $perPage;
+                $entityIntCollection = $connection->fetchAll($query);
+                foreach ($entityIntCollection as $int) {
+                    if ($int['value'] == '') {
+                        $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = '';
+                    } else {
+                        if ($this->_listCodeAttributes[$int['attribute_id']]['frontend_input'] == 'select' && $this->_listCodeAttributes[$int['attribute_id']]['backend_type'] == 'int') {
+                            if (isset($this->_listOptionValues[$int['attribute_id']][$int['value']])) {
+                                $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = $this->_listOptionValues[$int['attribute_id']][$int['value']];
+                            } else {
+                                $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = $int['value'];
+                            }
+                        } else {
+                            $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] = $int['value'];
                         }
-                    }else{
-                        $this->_listAttributeValues[$int['entity_id']][$this->_listCodeAttributes[$int['attribute_id']]['attribute_code']] =  $int['value'];
                     }
                 }
             }
         }
 
-        if ($this->_debug){
-            $this->_log('Load Attributes Values '.$type.'  ('.count($this->_listAttributeValues).')');
-            //print_r($this->_listAttributeValues);
+        if ($this->_debug) {
+            $this->_log('Load Attributes Values ' . $type . '  (' . count($this->_listAttributeValues) . ')');
         }
-
     }
 
     /**
      * Calculate price with Taxes
      *
-     * @param float $price             Price
-     * @param integer $taxClassId      Tax Class Id
+     * @param float $price Price
+     * @param integer $taxClassId Tax Class Id
      *
      * @return float price
      */
-
-    protected function _calculatePrice($price, $taxClassId){
+    protected function _calculatePrice($price, $taxClassId)
+    {
         $currentRate = $this->_listTaxes;
         if (!$this->_config['include_tax'] && isset($currentRate[$taxClassId])) {
             if (count($currentRate[$taxClassId]) > 1) {
-                return round($price,2);
+                return round($price, 2);
             } else {
-                return round($price * ($currentRate[$taxClassId] / 100 + 1),2);
+                return round($price * ($currentRate[$taxClassId] / 100 + 1), 2);
             }
         } else {
-            return round($price,2);
+            return round($price, 2);
         }
     }
 
     /**
      * Get Store attribute value
      *
-     * @param integer $productId             Id Product
-     * @param varchar $attributeCode         Attribute Code
+     * @param integer $productId Id Product
+     * @param varchar $attributeCode Attribute Code
      *
      * @return float price
      */
-
-    protected function _getAttributeValue($productId,$attributeCode){
-        if (isset($this->_listAttributeValues[$productId]) && isset($this->_listAttributeValues[$productId][$attributeCode])){
+    protected function _getAttributeValue($productId, $attributeCode)
+    {
+        if (isset($this->_listAttributeValues[$productId]) && isset($this->_listAttributeValues[$productId][$attributeCode])) {
             return $this->_listAttributeValues[$productId][$attributeCode];
-        }else{
+        } else {
             return '';
         }
     }
@@ -1300,10 +1334,10 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @param array $data
      */
-    protected  function _write($data)
+    protected function _write($data)
     {
-        if($this->_stream == false) {
-            if(!$this->_file) {
+        if ($this->_stream == false) {
+            if (!$this->_file) {
                 $this->_initFile();
             }
             $this->_file->streamLock();
@@ -1317,9 +1351,11 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
     /**
      * Create File for export
      */
-    protected  function _initFile()
+    protected function _initFile()
     {
-        if (!$this->_createDirectory()){ exit(); }
+        if (!$this->_createDirectory()) {
+            exit();
+        }
 
         $this->_fileTimeStamp = time();
         $this->_file = new Varien_Io_File;
@@ -1327,14 +1363,15 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         $this->_file->streamOpen($this->_fileName . '.' . $this->_fileTimeStamp . '.' . $this->_fileFormat, 'w+');
     }
 
-    protected function _createDirectory(){
+    protected function _createDirectory()
+    {
         try {
             $file = new Varien_Io_File;
             $file->checkAndCreateFolder($this->_config['directory_path']);
         } catch (Exception $e) {
-            Mage::helper('lensync/data')->log('can\'t create folder '.$this->_config['directory_path'].'');
-            if ($this->_debug){
-                $this->_log('can\'t create folder '.$this->_config['directory_path']);
+            Mage::helper('lensync/data')->log('can\'t create folder ' . $this->_config['directory_path'] . '');
+            if ($this->_debug) {
+                $this->_log('can\'t create folder ' . $this->_config['directory_path']);
             }
             return false;
         }
@@ -1344,10 +1381,11 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
     /**
      * Copies the file to the correct folder
      */
-    protected  function _copyFile()
+    protected function _copyFile()
     {
         $file_path = $this->_config['directory_path'];
-        copy($file_path . $this->_fileName . '.' . $this->_fileTimeStamp . '.' . $this->_fileFormat, $file_path . $this->_fileName . '.' . $this->_fileFormat);
+        copy($file_path . $this->_fileName . '.' . $this->_fileTimeStamp . '.' . $this->_fileFormat,
+            $file_path . $this->_fileName . '.' . $this->_fileFormat);
         unlink($file_path . $this->_fileName . '.' . $this->_fileTimeStamp . '.' . $this->_fileFormat);
     }
 
@@ -1370,11 +1408,14 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-    protected function _stop($timeStart, $title){
+    protected function _stop($timeStart, $title)
+    {
         $time_end = $this->microtime_float();
         $time = $time_end - $timeStart;
-        if ($time<0.0001){ $time = 0;}
-        echo round($time,4).' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; '.$title.'  secondes <br/>';
+        if ($time < 0.0001) {
+            $time = 0;
+        }
+        echo round($time, 4) . ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' . $title . '  secondes <br/>';
     }
 
     /**
@@ -1384,12 +1425,15 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return void
      */
-    protected function _log($title){
-        if($this->_stream){ return;}
+    protected function _log($title)
+    {
+        if ($this->_stream) {
+            return;
+        }
         $time_end = $this->microtime_float();
         $time = $time_end - $this->_startScript;
-
-        echo date('Y-m-d h:i:s').'|'.str_pad(sprintf('%0.4f', round($time,4)),10,'0',STR_PAD_LEFT).' '.str_pad($title, 40, '=', STR_PAD_BOTH).'<br/>';
+        echo date('Y-m-d h:i:s') . '|' . str_pad(sprintf('%0.4f', round($time, 4)), 10, '0',
+                STR_PAD_LEFT) . ' ' . str_pad($title, 40, '=', STR_PAD_BOTH) . '<br/>';
     }
 
     /**
@@ -1397,19 +1441,19 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
      *
      * @return boolean
      */
-    protected function _isAlreadyLaunch(){
-
+    protected function _isAlreadyLaunch()
+    {
         $directory = $this->_config['directory_path'];
-        if (!$this->_createDirectory()){
+        if (!$this->_createDirectory()) {
             exit();
         }
 
         try {
             $listFiles = array_diff(scandir($directory), array('..', '.'));
         } catch (Exception $e) {
-            Mage::helper('lensync/data')->log('Can\'t access folder '.$this->_config['directory_path']);
-            if ($this->_debug){
-                $this->_log('Can\'t access folder '.$this->_config['directory_path']);
+            Mage::helper('lensync/data')->log('Can\'t access folder ' . $this->_config['directory_path']);
+            if ($this->_debug) {
+                $this->_log('Can\'t access folder ' . $this->_config['directory_path']);
             }
             exit();
         }
@@ -1432,5 +1476,4 @@ class Lengow_Export_Model_Generateoptimize extends Varien_Object {
         }
         return false;
     }
-
 }

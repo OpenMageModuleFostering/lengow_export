@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Lengow_Export>
-            <version>2.1.2</version>
+            <version>2.2.4</version>
         </Lengow_Export>
     </modules>
     <admin>
@@ -117,7 +117,7 @@
                 <children>
                     <export translate="title" module="lenexport">
                         <title>Manage Products Export</title>
-                        <action>adminhtml/lengow_export</action>
+                        <action>adminhtml/lengow_product</action>
                         <sort_order>200</sort_order>
                     </export>
                 </children>

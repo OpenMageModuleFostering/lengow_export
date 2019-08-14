@@ -3,7 +3,7 @@
 /**
  * @category    Lengow
  * @package     Lengow_Sync
- * @author      Ludovic DRIN <romain@lengow.com>
+ * @author      Team Connector <team-connector@lengow.com>
  * @copyright   2013 Lengow SAS
  */
 
@@ -12,8 +12,7 @@ $installer->startSetup();
 
 /*
  * Add order infos
- *  - Carrier - text
- *  - Carrier method - text
+ *  - carrier - string
  */
 $order_entity_id = $installer->getEntityTypeId('order');
 

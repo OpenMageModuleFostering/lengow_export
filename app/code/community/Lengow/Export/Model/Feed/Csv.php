@@ -1,25 +1,27 @@
 <?php
+
 /**
- * Lengow export feed csv
+ * Lengow export model feed csv
  *
  * @category    Lengow
  * @package     Lengow_Export
- * @author      Ludovic Drin <ludovic@lengow.com>
- * @copyright   2013 Lengow SAS 
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Export_Model_Feed_Csv extends Lengow_Export_Model_Feed_Abstract {
+class Lengow_Export_Model_Feed_Csv extends Lengow_Export_Model_Feed_Abstract
+{
 
     /**
      * CSV separator.
      */
     public static $CSV_SEPARATOR = '|';
-    
+
     /**
      * CSV protection.
      */
     public static $CSV_PROTECTION = '"';
-    
+
     /**
      * CSV End of line.
      */
@@ -27,27 +29,34 @@ class Lengow_Export_Model_Feed_Csv extends Lengow_Export_Model_Feed_Abstract {
 
     protected $_content_type = 'text/csv';
 
-    public function getContentType() {
+    public function getContentType()
+    {
         return $this->_content_type;
     }
 
-    public function makeHeader() {
+    public function makeHeader()
+    {
         $head = '';
-        foreach($this->_fields as $name) {
-            $head .= self::$CSV_PROTECTION . $this->_clean(substr(str_replace('-', '_', $name), 0, 59)) . self::$CSV_PROTECTION . self::$CSV_SEPARATOR;
+        foreach ($this->_fields as $name) {
+            $head .= self::$CSV_PROTECTION . $this->_clean(substr(str_replace('-', '_', $name), 0,
+                    59)) . self::$CSV_PROTECTION . self::$CSV_SEPARATOR;
         }
-        return rtrim($head, self::$CSV_SEPARATOR) . self::$CSV_EOL;     
+        return rtrim($head, self::$CSV_SEPARATOR) . self::$CSV_EOL;
     }
 
-    public function makeData($array, $args = array()) {
+    public function makeData($array, $args = array())
+    {
         $line = '';
-        foreach($this->_fields as $name) {
-            $line .= self::$CSV_PROTECTION . (array_key_exists($name, $array) ? (str_replace(array(self::$CSV_PROTECTION, '\\'), '', $array[$name]))  : '') . self::$CSV_PROTECTION . self::$CSV_SEPARATOR;
+        foreach ($this->_fields as $name) {
+            $line .= self::$CSV_PROTECTION . (array_key_exists($name,
+                    $array) ? (str_replace(array(self::$CSV_PROTECTION, '\\'), '',
+                    $array[$name])) : '') . self::$CSV_PROTECTION . self::$CSV_SEPARATOR;
         }
-        return rtrim($line, self::$CSV_SEPARATOR) . self::$CSV_EOL;     
+        return rtrim($line, self::$CSV_SEPARATOR) . self::$CSV_EOL;
     }
 
-    public function makeFooter()  {
+    public function makeFooter()
+    {
         return '';
     }
 
@@ -57,7 +66,8 @@ class Lengow_Export_Model_Feed_Csv extends Lengow_Export_Model_Feed_Abstract {
      * @param string $str The fieldname
      * @return string The formated header.
      */
-    private function _clean($str) {
+    private function _clean($str)
+    {
         $patterns = array(
             /* Lowercase */
             '/[\x{0105}\x{00E0}\x{00E1}\x{00E2}\x{00E3}\x{00E4}\x{00E5}]/u',
@@ -91,12 +101,41 @@ class Lengow_Export_Model_Feed_Csv extends Lengow_Export_Model_Feed_Abstract {
             '/[\x{00D9}\x{00DA}\x{00DB}\x{00DC}\x{016E}]/u',
             '/[\x{017B}\x{0179}\x{017D}]/u',
             '/[\x{00C6}]/u',
-            '/[\x{0152}]/u');
+            '/[\x{0152}]/u'
+        );
         $replacements = array(
-                'a', 'c', 'd', 'e', 'i', 'l', 'n', 'o', 'r', 's', 'ss', 't', 'u', 'y', 'z', 'ae', 'oe',
-                'A', 'C', 'D', 'E', 'L', 'N', 'O', 'R', 'S', 'T', 'U', 'Z', 'AE', 'OE'
-            );
+            'a',
+            'c',
+            'd',
+            'e',
+            'i',
+            'l',
+            'n',
+            'o',
+            'r',
+            's',
+            'ss',
+            't',
+            'u',
+            'y',
+            'z',
+            'ae',
+            'oe',
+            'A',
+            'C',
+            'D',
+            'E',
+            'L',
+            'N',
+            'O',
+            'R',
+            'S',
+            'T',
+            'U',
+            'Z',
+            'AE',
+            'OE'
+        );
         return preg_replace($patterns, $replacements, $str);
     }
-
 }

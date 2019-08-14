@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Lengow_Sync>
-            <version>2.1.2</version>
+            <version>2.2.4</version>
         </Lengow_Sync>
     </modules>
     <admin>
@@ -35,6 +35,9 @@
                     <log>
                         <table>lengow_log</table>
                     </log>
+                    <orderline>
+                        <table>lengow_order_line</table>
+                    </orderline>
                 </entities>
             </sync_mysql4>
         </models>
@@ -78,14 +81,14 @@
                     </lengow_shipment_save_after>
                 </observers>
             </sales_order_shipment_save_after>
-            <!-- <sales_order_shipment_track_save_after>
+            <sales_order_shipment_track_save_after>
                 <observers>
                     <lengow_shipment_track_save_after>
                         <class>Lengow_Sync_Model_Observer</class>
                         <method>salesOrderShipmentTrackSaveAfter</method>
                     </lengow_shipment_track_save_after>
                 </observers>
-            </sales_order_shipment_track_save_after> -->
+            </sales_order_shipment_track_save_after>
             <sales_order_payment_cancel>
                 <observers>
                     <lengow_payment_cancel>
@@ -94,16 +97,50 @@
                     </lengow_payment_cancel>
                 </observers>
             </sales_order_payment_cancel>
-            <sales_order_save_commit_after>
-                <observers>
-                    <lengow_order_save_commit_after>
-                        <class>Lengow_Sync_Model_Observer</class>
-                        <method>salesOrderSaveCommitAfter</method>
-                    </lengow_order_save_commit_after>
-                </observers>
-            </sales_order_save_commit_after>
         </events>
         <fieldsets>
+            <lengow_convert_address>
+                <company>
+                    <to_customer>company</to_customer>
+                    <to_billing_address>company</to_billing_address>
+                    <to_shipping_address>company</to_shipping_address>
+                </company>
+                <last_name>
+                    <to_customer>lastname</to_customer>
+                    <to_billing_address>lastname</to_billing_address>
+                    <to_shipping_address>lastname</to_shipping_address>
+                </last_name>
+                <first_name>
+                    <to_customer>firstname</to_customer>
+                    <to_billing_address>firstname</to_billing_address>
+                    <to_shipping_address>firstname</to_shipping_address>
+                </first_name>
+                <email>
+                    <to_customer>email</to_customer>
+                    <to_billing_address>email</to_billing_address>
+                    <to_shipping_address>email</to_shipping_address>
+                </email>
+                <phone_home>
+                    <to_billing_address>telephone</to_billing_address>
+                    <to_shipping_address>telephone</to_shipping_address>
+                </phone_home>
+                <address>
+                    <to_billing_address>street_full</to_billing_address>
+                    <to_shipping_address>street_full</to_shipping_address>
+                </address>
+                <zipcode>
+                    <to_billing_address>postcode</to_billing_address>
+                    <to_shipping_address>postcode</to_shipping_address>
+                </zipcode>
+                <city>
+                    <to_billing_address>city</to_billing_address>
+                    <to_shipping_address>city</to_shipping_address>
+                </city>
+                <common_country_iso_a2>
+                    <to_billing_address>country_id</to_billing_address>
+                    <to_shipping_address>country_id</to_shipping_address>
+                </common_country_iso_a2>
+            </lengow_convert_address>
             <lengow_convert_billing_address>
                 <billing_society>
                     <to_customer>company</to_customer>
@@ -218,7 +255,7 @@
                                     <title>Manage Orders</title>
                                 </sync>
                                 <log translate="title" module="lensync">
-                                    <title>Manage Logs</title>
+                                    <title>Logs</title>
                                 </log>
                             </children>
                         </lengow>
@@ -248,7 +285,6 @@
                 <processing_fee>1</processing_fee>
                 <customer_group>0</customer_group>
                 <title>0</title>
-                <!-- <pending>0</pending> -->
                 <split_name>0</split_name>
                 <default_shipping>lengow_lengow</default_shipping>
                 <fake_email>0</fake_email>
@@ -289,4 +325,11 @@
             </lengow>
         </carriers>
     </default>
+    <phpunit>
+        <suite>
+            <modules>
+                <Lengow_Sync/>
+            </modules>
+        </suite>
+    </phpunit>
 </config>

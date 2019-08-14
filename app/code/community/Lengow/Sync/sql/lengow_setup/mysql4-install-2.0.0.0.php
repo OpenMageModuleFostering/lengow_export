@@ -3,7 +3,7 @@
 /**
  * @category    Lengow
  * @package     Lengow_Sync
- * @author      Romain Le Polh <romain@lengow.com>
+ * @author      Team Connector <team-connector@lengow.com>
  * @copyright   2013 Lengow SAS
  */
 
@@ -173,7 +173,7 @@ if(!$attribute){
         'unique'            => 0,
         'used_in_product_listing' => 1
     ));
-}else{
+} else {
     $installer->updateAttribute('catalog_product','lengow_product','default_value', 0);
     $installer->updateAttribute('catalog_product','lengow_product','is_global', Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE);
 }

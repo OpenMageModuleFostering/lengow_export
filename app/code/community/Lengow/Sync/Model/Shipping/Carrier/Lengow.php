@@ -1,14 +1,16 @@
 <?php
+
 /**
  * Lengow sync model shipping carrier lengow
  *
  * @category    Lengow
  * @package     Lengow_Sync
- * @author      Ludovic Drin <ludovic@lengow.com>
- * @copyright   2013 Lengow SAS
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Sync_Model_Shipping_Carrier_Lengow extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface {
+class Lengow_Sync_Model_Shipping_Carrier_Lengow extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
+{
 
     protected $_code = 'lengow';
     protected $_isFixed = true;
@@ -19,7 +21,8 @@ class Lengow_Sync_Model_Shipping_Carrier_Lengow extends Mage_Shipping_Model_Carr
      * @param Mage_Shipping_Model_Rate_Request $request
      * @return Mage_Shipping_Model_Rate_Result
      */
-    public function collectRates(Mage_Shipping_Model_Rate_Request $request) {
+    public function collectRates(Mage_Shipping_Model_Rate_Request $request)
+    {
         if (!$this->isActive()) {
             return false;
         }
@@ -36,27 +39,31 @@ class Lengow_Sync_Model_Shipping_Carrier_Lengow extends Mage_Shipping_Model_Carr
     }
 
     /**
-    * Processing additional validation to check is carrier applicable.
-    *
-    * @param Mage_Shipping_Model_Rate_Request $request
-    * @return Mage_Shipping_Model_Carrier_Abstract|Mage_Shipping_Model_Rate_Result_Error|boolean
-    */
-    public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request) {
-        if(Mage::getVersion() == '1.4.1.0')
-           return $this->isActive();
+     * Processing additional validation to check is carrier applicable.
+     *
+     * @param Mage_Shipping_Model_Rate_Request $request
+     * @return Mage_Shipping_Model_Carrier_Abstract|Mage_Shipping_Model_Rate_Result_Error|boolean
+     */
+    public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
+    {
+        if (Mage::getVersion() == '1.4.1.0') {
+            return $this->isActive();
+        }
         return parent::proccessAdditionalValidation($request);
     }
 
-    public function getSession() {
+    public function getSession()
+    {
         return Mage::getSingleton('checkout/session');
     }
 
-    public function isActive() {
+    public function isActive()
+    {
         return Mage::getSingleton('core/session')->getIsFromlengow();
     }
 
-    public function getAllowedMethods() {
+    public function getAllowedMethods()
+    {
         return array('lengow' => $this->getConfigData('name'));
     }
-
 }

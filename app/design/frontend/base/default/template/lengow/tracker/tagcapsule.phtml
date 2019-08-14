@@ -11,7 +11,8 @@ if ($this->getData('controller') == 'onepage' && $this->getData('current_action'
         ssl = '<?php echo $this->getData('use_ssl'); ?>';
         id_categorie = '<?php echo $this->getData('id_category'); ?>'; // #ID CATEGORIE EN COURS#
     </script>
-    <script type="text/javascript" src="https://tracking.lengow.com/tagcapsule.js?lengow_id=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>"></script>
+    <script type="text/javascript"
+            src="https://tracking.lengow.com/tagcapsule.js?lengow_id=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>"></script>
     <?php
 }
 ?>
@@ -26,6 +27,6 @@ if ($this->getData('controller') == 'onepage' && $this->getData('current_action'
         var id_categorie = '<?php echo $this->getData('id_category'); ?>'; // #ID CATEGORIE EN COURS#
     </script>
 </div>
-<script id="url_script" type="text/javascript" src="https://tracking.lengow.com/tagcapsule.js?lengow_id=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>"></script>
-
+<script id="url_script" type="text/javascript"
+        src="https://tracking.lengow.com/tagcapsule.js?lengow_id=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>"></script>
 <!-- /Tag_Lengow -->

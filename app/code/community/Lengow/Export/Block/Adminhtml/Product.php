@@ -1,19 +1,22 @@
 <?php
+
 /**
- * Lengow select products block
+ * Lengow export block adminhtml product
  *
  * @category    Lengow
  * @package     Lengow_Export
- * @author      Ludovic Drin <ludovic@lengow.com>
- * @copyright   2013 Lengow SAS 
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Export_Block_Adminhtml_Product extends Mage_Adminhtml_Block_Widget_Container {
+class Lengow_Export_Block_Adminhtml_Product extends Mage_Adminhtml_Block_Widget_Container
+{
 
     /**
      * Set template
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -22,11 +25,12 @@ class Lengow_Export_Block_Adminhtml_Product extends Mage_Adminhtml_Block_Widget_
      *
      * @return Mage_Adminhtml_Block_Catalog_Product
      */
-    protected function _prepareLayout() {
+    protected function _prepareLayout()
+    {
         $this->_addButton('export', array(
-            'label'   => Mage::helper('lenexport')->__('See the export feed'),
-            'onclick' => 'popWin(\''.$this->getUrl('lengow/feed', array('_current'=>true)).'\', \'_blank\')',
-            'class'   => 'add'
+            'label' => Mage::helper('lenexport')->__('See the export feed'),
+            'onclick' => 'popWin(\'' . $this->getUrl('lengow/feed', array('_current' => true)) . '\', \'_blank\')',
+            'class' => 'add'
         ));
         $this->setChild('grid', $this->getLayout()->createBlock('lenexport/adminhtml_product_grid', 'product.grid'));
         return parent::_prepareLayout();
@@ -37,7 +41,8 @@ class Lengow_Export_Block_Adminhtml_Product extends Mage_Adminhtml_Block_Widget_
      *
      * @return string
      */
-    public function getGridHtml() {
+    public function getGridHtml()
+    {
         return $this->getChildHtml('grid');
     }
 
@@ -46,9 +51,10 @@ class Lengow_Export_Block_Adminhtml_Product extends Mage_Adminhtml_Block_Widget_
      *
      * @return bool
      */
-    public function isSingleStoreMode() {
+    public function isSingleStoreMode()
+    {
         if (!Mage::app()->isSingleStoreMode()) {
-               return false;
+            return false;
         }
         return true;
     }

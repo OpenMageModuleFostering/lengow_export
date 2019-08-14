@@ -1,17 +1,20 @@
 <?php
+
 /**
- * Lengow select products block
+ * Lengow sync block adminhtml order tab
  *
  * @category    Lengow
  * @package     Lengow_Sync
- * @author      Romain Le Pohl <romain@lengow.com>
- * @copyright   2013 Lengow SAS
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 class Lengow_Sync_Block_Adminhtml_Order_Tab extends Mage_Adminhtml_Block_Sales_Order_Abstract
-    implements Mage_Adminhtml_Block_Widget_Tab_Interface {
+    implements Mage_Adminhtml_Block_Widget_Tab_Interface
+{
 
-    protected function _construct() {
+    protected function _construct()
+    {
         $this->setTemplate('lengow/sales/order/tab/info.phtml');
     }
 
@@ -20,7 +23,8 @@ class Lengow_Sync_Block_Adminhtml_Order_Tab extends Mage_Adminhtml_Block_Sales_O
      *
      * @return Mage_Sales_Model_Order
      */
-    public function getOrder() {
+    public function getOrder()
+    {
         return Mage::registry('current_order');
     }
 
@@ -29,24 +33,29 @@ class Lengow_Sync_Block_Adminhtml_Order_Tab extends Mage_Adminhtml_Block_Sales_O
      *
      * @return Mage_Sales_Model_Order
      */
-    public function getSource() {
+    public function getSource()
+    {
         return $this->getOrder();
     }
 
 
-    public function getTabLabel() {
+    public function getTabLabel()
+    {
         return Mage::helper('sales')->__('Lengow');
     }
 
-    public function getTabTitle() {
+    public function getTabTitle()
+    {
         return Mage::helper('sales')->__('Lengow');
     }
 
-    public function canShowTab() {
+    public function canShowTab()
+    {
         return true;
     }
 
-    public function isHidden() {
+    public function isHidden()
+    {
         return false;
     }
 
@@ -55,7 +64,8 @@ class Lengow_Sync_Block_Adminhtml_Order_Tab extends Mage_Adminhtml_Block_Sales_O
      *
      * @return Array
      */
-    public function getFields() {
+    public function getFields()
+    {
         $fields = array();
         $order = $this->getOrder();
 
@@ -108,7 +118,8 @@ class Lengow_Sync_Block_Adminhtml_Order_Tab extends Mage_Adminhtml_Block_Sales_O
      *
      * @return boolean
      */
-    public function isLengowOrder() {
+    public function isLengowOrder()
+    {
         return $this->getOrder()->getData('from_lengow');
     }
 }

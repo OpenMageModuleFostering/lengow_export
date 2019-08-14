@@ -82,6 +82,7 @@
 	background-color: #5cb85c;
 	border-color: #4cae4c;
 }
+
 .lengow-must-be-updated {
   	color: #ffffff;
 	background-color: #d2322d;
@@ -99,12 +100,14 @@
 	color: white;
 	text-align: center;
 }
+
 .lengow-debug-red {
 	background: #9E0C00;
 	text-align: center;
 	font-weight: bold;
 	color: white;
 }
+
 .lengow-debug-orange {
 	background: #F37A00;
 	text-align: center;

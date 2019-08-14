@@ -1,16 +1,19 @@
 <?php
+
 /**
- * Lengow adminhtml log grid
+ * Lengow sync block adminhtml log grid
  *
  * @category    Lengow
  * @package     Lengow_Sync
- * @author      Ludovic Drin <ludovic@lengow.com>
- * @copyright   2013 Lengow SAS 
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Sync_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid {	
+class Lengow_Sync_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->setId('sales_sync_log_grid');
         $this->setUseAjax(true);
@@ -19,17 +22,19 @@ class Lengow_Sync_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_G
         $this->setSaveParametersInSession(true);
     }
 
-    protected function _prepareCollection() {
-        $collection = Mage::getModel('lensync/log')->getCollection();        
+    protected function _prepareCollection()
+    {
+        $collection = Mage::getModel('lensync/log')->getCollection();
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
 
-    protected function _prepareColumns() {
+    protected function _prepareColumns()
+    {
         $this->addColumn('id', array(
-            'header'=> Mage::helper('lensync')->__('ID'),
+            'header' => Mage::helper('lensync')->__('ID'),
             'width' => '80px',
-            'type'  => 'text',
+            'type' => 'text',
             'index' => 'id',
         ));
         $this->addColumn('date', array(
@@ -45,8 +50,8 @@ class Lengow_Sync_Block_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_G
         return parent::_prepareColumns();
     }
 
-    public function getGridUrl() {
-        return $this->getUrl('*/*/grid', array('_current'=>true));
+    public function getGridUrl()
+    {
+        return $this->getUrl('*/*/grid', array('_current' => true));
     }
-
 }

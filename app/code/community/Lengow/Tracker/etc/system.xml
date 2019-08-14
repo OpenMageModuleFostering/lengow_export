@@ -28,37 +28,90 @@
                 <general translate="label, comment">
                     <label>Lengow API</label>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
+                    <show_in_website>0</show_in_website>
                     <show_in_store>1</show_in_store>
                     <sort_order>1</sort_order>
                     <fields>
+                        <version2>
+                            <label>Compatibility with the old version of the Lengow platform</label>
+                            <comment>Activate this option if you have the old version of the Lengow platform</comment>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                        </version2>
                         <login>
                             <label>Customer ID</label>
                             <comment>Your Customer ID of Lengow</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>3</sort_order>
+                            <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><version2>1</version2></depends>
                         </login>
                         <group>
                             <label>Group ID</label>
                             <comment>Your Group ID of Lengow</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>5</sort_order>
-                            <show_in_default>0</show_in_default>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><version2>1</version2></depends>
                         </group>
                         <api_key>
                             <label>Token API</label>
-                            <comment>You can find credentials on your Lengow Dashboard</comment>             
+                            <comment>Your Token API of Lengow</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>20</sort_order>
+                            <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <depends><version2>1</version2></depends>
                         </api_key>
+                        <version3>
+                            <label>Compatibility with the new version of the Lengow platform</label>
+                            <comment>Activate this option if you have the new version of the Lengow platform</comment>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                        </version3>
+                        <account_id>
+                            <label>Account ID</label>
+                            <comment>Your Account ID of Lengow</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><version3>1</version3></depends>
+                        </account_id>
+                        <access_token>
+                            <label>Access token</label>
+                            <comment>Your Access Token of Lengow</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><version3>1</version3></depends>
+                        </access_token>
+                        <secret>
+                            <label>Secret</label>
+                            <comment>Your Secret Token of Lengow</comment>         
+                            <frontend_type>text</frontend_type>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><version3>1</version3></depends>
+                        </secret>
                     </fields>
                 </general>
                 <tag translate="label, comment">

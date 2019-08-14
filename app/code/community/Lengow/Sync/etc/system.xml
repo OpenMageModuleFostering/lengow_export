@@ -79,16 +79,6 @@
                             <show_in_store>1</show_in_store>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                         </title>
-                        <!--<pending>
-                            <label>Import order in pending payment</label>
-                            <comment>Import an order in pendinf payment (like check or money order)</comment>
-                            <frontend_type>select</frontend_type>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                        </pending>-->
 						<split_name>
 							<label>Split name</label>
 							<comment>If one of the name fields is empty, the non-empty field will be split to fill the empty name field</comment>

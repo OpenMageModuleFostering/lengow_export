@@ -1,14 +1,16 @@
 <?php
+
 /**
- * Lengow sync model order
+ * Lengow sync model quote item
  *
  * @category    Lengow
  * @package     Lengow_Sync
- * @author      Ludovic Drin <ludovic@lengow.com>
- * @copyright   2013 Lengow SAS 
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Sync_Model_Quote_Item extends Mage_Sales_Model_Quote_Item {
+class Lengow_Sync_Model_Quote_Item extends Mage_Sales_Model_Quote_Item
+{
 
     /**
      * Specify item price (base calculation price and converted price will be refreshed too)

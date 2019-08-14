@@ -133,7 +133,7 @@
             <state name="closed">
                 <lengow>shipped</lengow>
             </state>
-             <state name="CLOSED">
+            <state name="CLOSED">
                 <lengow>shipped</lengow>
             </state>
             <state name="CANCELLED">
@@ -214,11 +214,11 @@
             </state>
         </states>
         <additional_params>
-            <param usedby="shipped" require="carrier">
+            <param usedby="shipped">
                 <type>tracking</type>
                 <name>colis_idTracking</name>
             </param>
-            <param usedby="shipped" require="tracking">
+            <param usedby="shipped">
                 <type>carrier</type>
                 <name>transporteur</name>
             </param>
@@ -1385,32 +1385,6 @@
             <param usedby="shipped" require="tracking">
                 <type>carrier</type>
                 <name>Transporteur</name>
-                <accepted_values>
-                    <value label="La Poste" default="true">LAPOSTE</value>
-                    <value label="DHL">DHL</value>
-                    <value label="Fedex">FEDEX</value>
-                    <value label="GLS">GLS</value>
-                    <value label="UPS">UPS</value>
-                    <value label="TAT Express">TAT</value>
-                    <value label="TNT">TNT</value>
-                    <value label="Mondial Relay">MONDIALRELAY</value>
-                    <value label="SERNAM">SERNAM</value>
-                    <value label="Geodis Calberson">GEODISCALBERSON</value>
-                    <value label="France Express">FRANCEEXPRESS</value>
-                    <value label="SDEN">FRANCSDENEEXPRESS</value>
-                    <value label="CHRONOPOST">Chronopost</value>
-                    <value label="TATEX">TATEX</value>
-                    <value label="SCHENKER JOYAU">SCHENKER_JOYAU</value>
-                    <value label="Relais colis">Relais_colis</value>
-                    <value label="Gefco">Gefco</value>
-                    <value label="MORY">MORY</value>
-                    <value label="Heppner">Heppner</value>
-                    <value label="Exapaq">Exapaq</value>
-                    <value label="Mazet">Mazet</value>
-                    <value label="SIC EXPRESS">SICEXPRESS</value>
-                    <value label="TMB">TMB</value>
-                    <value label="DPD">DPD</value>
-                 </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
@@ -1422,10 +1396,14 @@
             <carrier code='STD'>standard</carrier>
             <carrier code='TRK'>suivi</carrier>
             <carrier code='REG'>recommande</carrier>
-            <carrier code='COL'>colissimo</carrier>
             <carrier code='RCO'>relaiscolis</carrier>
             <carrier code='REL'>mondialrelay</carrier>
             <carrier code='MAG'>inshop</carrier>
+            <carrier code='LV1'>BigParcelEco</carrier>
+            <carrier code='LV2'>BigParcelStandard</carrier>
+            <carrier code='LV3'>BigParcelComfort</carrier>
+            <carrier code='EXP'>Express</carrier>
+            <carrier code='FST'>Fast</carrier>
         </carriers>
     </marketplace>
     <marketplace name="moncornerdeco">
@@ -1524,7 +1502,7 @@
                     <value label="SIC EXPRESS">SICEXPRESS</value>
                     <value label="TMB">TMB</value>
                     <value label="DPD">DPD</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
@@ -1628,7 +1606,7 @@
                     <value label="SIC EXPRESS">SICEXPRESS</value>
                     <value label="TMB">TMB</value>
                     <value label="DPD">DPD</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
@@ -1732,7 +1710,7 @@
                     <value label="SIC EXPRESS">SICEXPRESS</value>
                     <value label="TMB">TMB</value>
                     <value label="DPD">DPD</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
@@ -1836,7 +1814,7 @@
                     <value label="SIC EXPRESS">SICEXPRESS</value>
                     <value label="TMB">TMB</value>
                     <value label="DPD">DPD</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
@@ -1940,7 +1918,7 @@
                     <value label="SIC EXPRESS">SICEXPRESS</value>
                     <value label="TMB">TMB</value>
                     <value label="DPD">DPD</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
@@ -2044,7 +2022,7 @@
                     <value label="SIC EXPRESS">SICEXPRESS</value>
                     <value label="TMB">TMB</value>
                     <value label="DPD">DPD</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
@@ -2052,7 +2030,7 @@
             </param>
         </additional_params>
     </marketplace>
-     <marketplace name="laredoute">
+    <marketplace name="laredoute">
         <api>https://wsdl.lengow.com/wsdl/laredoute/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <apibyline>https://wsdl.lengow.com/wsdl/laredoute/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QTY_TO_REFUND#/#FDP#/#ACTION#.xml</apibyline>
         <states>
@@ -2072,6 +2050,9 @@
                     <action type="shipped">shippedOrder</action>
                     <action type="refund">refundOrder</action>
                     <action type="refundLine" usedbyline="true">refundOrder</action>
+                    <action type="cancel">OutOfStock</action>
+                    <action type="cancelLine" usedbyline="true">OutOfStock</action>
+                    <action type="shippedLine" usedbyline="true">shippedOrder</action>
                 </actions>
                 <lengow>processing</lengow>
             </state>
@@ -2087,6 +2068,21 @@
             </state>
             <state name="Refunded">
                 <lengow>canceled</lengow>
+            </state>
+            <state name="Paid">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="Refunding">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="ToApprove">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="OutOfStock">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="RefundRefused">
+                <lengow>shipped</lengow>
             </state>
             <state name="Cancelled">
                 <lengow>canceled</lengow>
@@ -2273,7 +2269,11 @@
             </param>
             <param usedby="shipped">
                 <type>carrier</type>
-                <name>Transporteur</name>
+                <name>TransporteurColis</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>TrackingUrl</name>
             </param>
         </additional_params>
     </marketplace>
@@ -2451,8 +2451,21 @@
                 <name>carrier_name</name>
             </param>
             <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Colissimo" default="true">colissimo</value>
+                    <value label="Chronopost">chronopost</value>
+                    <value label="UPS">ups</value>
+                    <value label="GLS">gls</value>
+                    <value label="Gefco">gefco</value>
+                    <value label="DPD">dpd</value>
+                    <value label="DHL France">dhl</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -2522,8 +2535,20 @@
                 <name>carrier_name</name>
             </param>
             <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Socolissimo">T1</value>
+                    <value label="Mondial Relay LD1">T2</value>
+                    <value label="Calberson">T3</value>
+                    <value label="Relais Colis">T4</value>
+                    <value label="Chronopost">T5</value>
+                    <value label="GLS">T6</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -2593,8 +2618,27 @@
                 <name>carrier_name</name>
             </param>
             <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="La Poste - Colissimo" default="true">COLISSIMO</value>
+                    <value label="La Poste - Lettre Max">LAPOSTE</value>
+                    <value label="Chonopost">CHRONOPOST</value>
+                    <value label="Colis Privé">COLISPRIVE</value>
+                    <value label="UPS">UPS</value>
+                    <value label="DHL">DHL</value>
+                    <value label="TNT">TNT</value>
+                    <value label="Fedex">FEDEX</value>
+                    <value label="DPD UK">DPD</value>
+                    <value label="DPD DE">DPDDE</value>
+                    <value label="Exapaq">EXAPAQ</value>
+                    <value label="Elite Express">ELITEEXPRESS</value>
+                    <value label="Post Luxembourg">POSTLU</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -2662,15 +2706,25 @@
             <param usedby="shipped">
                 <type>carrier</type>
                 <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
                 <accepted_values>
                     <value label="MRW" default="true">MRW</value>
                     <value label="UPS">UPS</value>
+                    <value label="SEUR">SEUR</value>
+                    <value label="DHL">DHL</value>
+                    <value label="ENVIALIA">ENVIALIA</value>
+                    <value label="CORREOS">CORREOS</value>
+                    <value label="CHRONO EXPRESS">CHRONO EXPRESS</value>
                     <value label="ASM">ASM</value>
-                 </accepted_values>
+                    <value label="DEUTSCHE POST">DEUTSCHE POST</value>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -2735,19 +2789,23 @@
                 <type>tracking</type>
                 <name>tracking_number</name>
             </param>
-             <param usedby="shipped">
+            <param usedby="shipped">
                 <type>carrier</type>
                 <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
                 <accepted_values>
                     <value label="Colissimo" default="true">1</value>
                     <value label="La Poste">2</value>
                     <value label="Fedex">3</value>
                     <value label="UPS">4</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -2814,17 +2872,13 @@
             </param>
             <param usedby="shipped">
                 <type>carrier</type>
-                <name>carrier_name</name>
+                <name>carrier_code</name>
                 <accepted_values>
                     <value label="Colissimo" default="true">1</value>
                     <value label="TNT">2</value>
                     <value label="Mondial Relay">3</value>
                     <value label="DHL">4</value>
-                 </accepted_values>
-            </param>
-            <param usedby="shipped">
-                <type>tracking_url</type>
-                <name>carrier_url</name>
+                </accepted_values>
             </param>
         </additional_params>
     </marketplace>
@@ -2894,8 +2948,16 @@
                 <name>carrier_name</name>
             </param>
             <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Colissimo" default="true">Colissimo</value>
+                    <value label="La Poste">LAPOSTE</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -2963,16 +3025,24 @@
             <param usedby="shipped">
                 <type>carrier</type>
                 <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
                 <accepted_values>
-                    <value label="Colissimo" default="true">1</value>
-                    <value label="TNT">2</value>
-                    <value label="Mondial Relay">3</value>
-                    <value label="DHL">4</value>
-                 </accepted_values>
+                    <value label="MRW">MRW</value>
+                    <value label="UPS">UPS</value>
+                    <value label="SEUR">SEUR</value>
+                    <value label="DHL">DHL</value>
+                    <value label="ENVIALIA">ENVIALIA</value>
+                    <value label="CORREOS">CORREOS</value>
+                    <value label="CHRONO EXPRESS">CHRONO EXPRESS</value>
+                    <value label="ASM">ASM</value>
+                </accepted_values>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -3038,12 +3108,22 @@
                 <name>tracking_number</name>
             </param>
             <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Chronospost" default="true">CHRONOPOST</value>
+                    <value label="DHL">DHL</value>
+                    <value label="TNT">TNT</value>
+                    <value label="Colissimo">COLISSIMO</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
                 <type>carrier</type>
                 <name>carrier_name</name>
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -3113,8 +3193,19 @@
                 <name>carrier_name</name>
             </param>
             <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Colissimo" default="true">CO</value>
+                    <value label="Chronopost">CHR</value>
+                    <value label="Courrier suivi">COS</value>
+                    <value label="GLS">Group</value>
+                    <value label="UPS">UPS</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
@@ -3180,7 +3271,7 @@
                     <value label="Divers" default="true">1</value>
                     <value label="Colissimo">2</value>
                     <value label="Lettre Max">3</value>
-                 </accepted_values>
+                </accepted_values>
             </param>
         </additional_params>
     </marketplace>
@@ -3321,12 +3412,12 @@
             </param>
             <param usedby="shipped">
                 <type>tracking_url</type>
-                <name>carrier_url</name>
+                <name>tracking_url</name>
             </param>
         </additional_params>
     </marketplace>
     <marketplace name="rakuten_de">
-       <api>https://wsdl.lengow.com/wsdl/rakutende/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <api>https://wsdl.lengow.com/wsdl/rakutende/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <states>
             <state name="pending">
                 <lengow>new</lengow>
@@ -3347,9 +3438,23 @@
                 <lengow>canceled</lengow>
             </state>
         </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
     </marketplace>
     <marketplace name="rakuten_es">
-       <api>https://wsdl.lengow.com/wsdl/rakutenes/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <api>https://wsdl.lengow.com/wsdl/rakutenes/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <states>
             <state name="Unfixed">
                 <lengow>new</lengow>
@@ -3382,7 +3487,7 @@
         </states>
     </marketplace>
     <marketplace name="rakuten_uk">
-       <api>https://wsdl.lengow.com/wsdl/rakutenuk/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <api>https://wsdl.lengow.com/wsdl/rakutenuk/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
         <states>
             <state name="Unfixed">
                 <lengow>new</lengow>
@@ -3415,47 +3520,47 @@
         </states>
     </marketplace>
     <marketplace name="spartoo">
-       <api>https://wsdl.lengow.com/wsdl/spartoo/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <states>
-           <state name="0">
-               <lengow>new</lengow>
-           </state>
-           <state name="1">
-               <actions>
-                   <action type="accept">processing</action>
-                   <action type="cancel">canceled</action>
-                   <action type="refund">refund</action>
-               </actions>
-               <lengow>new</lengow>
-           </state>
-           <state name="11">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept">processing</action>
-                   <action type="cancel">canceled</action>
-                   <action type="refund">refund</action>
-               </actions>
-           </state>
-           <state name="2">
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="cancel">canceled</action>
-                   <action type="refund">refund</action>
-               </actions>
-               <lengow>processing</lengow>
-           </state>
-           <state name="3">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="4">
-               <lengow>canceled</lengow>
-           </state>
-           <state name="41">
-               <lengow>canceled</lengow>
-           </state>
-           <state name="48">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/spartoo/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="0">
+                <lengow>new</lengow>
+            </state>
+            <state name="1">
+                <actions>
+                    <action type="accept">processing</action>
+                    <action type="refuse">canceled</action>
+                    <action type="refund">refund</action>
+                </actions>
+                <lengow>new</lengow>
+            </state>
+            <state name="11">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">processing</action>
+                    <action type="refuse">canceled</action>
+                    <action type="refund">refund</action>
+                </actions>
+            </state>
+            <state name="2">
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse">canceled</action>
+                    <action type="refund">refund</action>
+                </actions>
+                <lengow>processing</lengow>
+            </state>
+            <state name="3">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="4">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="41">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="48">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="shipped">
@@ -3465,33 +3570,33 @@
         </additional_params>
     </marketplace>
     <marketplace name="zalando">
-       <api>https://wsdl.lengow.com/wsdl/zalando/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <states>
-           <state name="New">
-               <lengow>new</lengow>
-           </state>
-           <state name="Approved">
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="cancel" method="post">canceled</action>
-               </actions>
-               <lengow>processing</lengow>
-           </state>
-           <state name="SHIPPED">
-               <actions>
-                   <action type="returned" method="post">returned</action>
-               </actions>
-               <lengow>shipped</lengow>
-           </state>
-           <state name="RETURNED">
-               <lengow>canceled</lengow>
-           </state>
-           <state name="ZALANDO_CANCELED">
-               <lengow>canceled</lengow>
-           </state>
-           <state name="NO_INVENTORY_CANCELED">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/zalando/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="New">
+                <lengow>new</lengow>
+            </state>
+            <state name="Approved">
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="cancel" method="post">canceled</action>
+                </actions>
+                <lengow>processing</lengow>
+            </state>
+            <state name="SHIPPED">
+                <actions>
+                    <action type="returned" method="post">returned</action>
+                </actions>
+                <lengow>shipped</lengow>
+            </state>
+            <state name="RETURNED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="ZALANDO_CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="NO_INVENTORY_CANCELED">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="shipped cancel refund returned">
@@ -3529,45 +3634,45 @@
         </additional_params>
     </marketplace>
     <marketplace name="placedumariage">
-       <states>
-           <state name="partielle">
-               <lengow>new</lengow>
-           </state>
-           <state name="complète">
-               <lengow>new</lengow>
-           </state>
-           <state name="expédiée">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="annulée">
-               <lengow>canceled</lengow>
-           </state>
-       </states>
+        <states>
+            <state name="partielle">
+                <lengow>new</lengow>
+            </state>
+            <state name="complète">
+                <lengow>new</lengow>
+            </state>
+            <state name="expédiée">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="annulée">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
     </marketplace>
     <marketplace name="home24_de">
-       <api>https://wsdl.lengow.com/wsdl/home24_de/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_de/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_de/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_de/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -3602,32 +3707,32 @@
                 <type>carrier</type>
                 <name>carrier_name</name>
             </param>
-    </additional_params>
+        </additional_params>
     </marketplace>
     <marketplace name="home24_fr">
-       <api>https://wsdl.lengow.com/wsdl/home24_fr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_fr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_fr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_fr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -3665,29 +3770,29 @@
         </additional_params>
     </marketplace>
     <marketplace name="home24_nl">
-       <api>https://wsdl.lengow.com/wsdl/home24_nl/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_nl/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_nl/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_nl/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -3725,29 +3830,29 @@
         </additional_params>
     </marketplace>
     <marketplace name="home24_at">
-       <api>https://wsdl.lengow.com/wsdl/home24_at/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_at/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_at/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_at/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -3785,29 +3890,29 @@
         </additional_params>
     </marketplace>
     <marketplace name="home24_bede">
-       <api>https://wsdl.lengow.com/wsdl/home24_bede/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_bede/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_bede/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_bede/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -3845,29 +3950,29 @@
         </additional_params>
     </marketplace>
     <marketplace name="home24_befr">
-       <api>https://wsdl.lengow.com/wsdl/home24_befr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_befr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_befr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_befr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -3905,29 +4010,29 @@
         </additional_params>
     </marketplace>
     <marketplace name="home24_it">
-       <api>https://wsdl.lengow.com/wsdl/home24_it/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_it/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_it/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_it/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -3965,29 +4070,29 @@
         </additional_params>
     </marketplace>
     <marketplace name="home24_chde">
-       <api>https://wsdl.lengow.com/wsdl/home24_chde/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_chde/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_chde/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_chde/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -4025,29 +4130,29 @@
         </additional_params>
     </marketplace>
     <marketplace name="home24_chfr">
-       <api>https://wsdl.lengow.com/wsdl/home24_chfr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <apibyline>https://wsdl.lengow.com/wsdl/home24_chfr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-               <actions>
-                   <action type="accept" method="post">processing</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">shipped</action>
-                   <action type="refuse" method="post">canceled</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/home24_chfr/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <apibyline>https://wsdl.lengow.com/wsdl/home24_chfr/#ID_FLUX#/#ORDER_ID#/#ORDER_LINE_ID#/#QUANTITY#/action_lines.xml</apibyline>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept" method="post">processing</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">shipped</action>
+                    <action type="refuse" method="post">canceled</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
         <additional_params>
             <param usedby="accept">
@@ -4085,23 +4190,1700 @@
         </additional_params>
     </marketplace>
     <marketplace name="ricardo">
-       <api>https://wsdl.lengow.com/wsdl/ricardo/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
-       <states>
-           <state name="new">
-               <lengow>new</lengow>
-           </state>
-           <state name="processing">
-               <lengow>processing</lengow>
-               <actions>
-                   <action type="shipped" method="post">ship</action>
-               </actions>
-           </state>
-           <state name="shipped">
-               <lengow>shipped</lengow>
-           </state>
-           <state name="canceled">
-               <lengow>canceled</lengow>
-           </state>
+        <api>https://wsdl.lengow.com/wsdl/ricardo/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="new">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">acceptOrder</action>
+                    <action type="refuse">refuseOrder</action>
+                </actions>
+            </state>
+            <state name="processing">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped" method="post">ship</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
         </states>
+    </marketplace>
+    <marketplace name="oclio">
+        <api>https://wsdl.lengow.com/wsdl/oclio/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+                <accepted_values>
+                    <value label="Colissimo" default="true">Colissimo</value>
+                    <value label="Chronopost">Chronopost</value>
+                    <value label="DHL">DHL</value>
+                    <value label="La Poste">La Poste</value>
+                    <value label="La Poste Lettre MAX">La Poste Lettre MAX</value>
+                    <value label="Fedex">Fedex</value>
+                    <value label="TNT">TNT</value>
+                    <value label="UPS">UPS</value>
+                </accepted_values>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="thebeautyst" realname="TheBeautyst" idshopbot="2049">
+        <api>https://wsdl.lengow.com/wsdl/thebeautyst/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Colissimo" default="true">colissimo</value>
+                    <value label="DHL">dhl</value>
+                    <value label="Chronopost">chronopost</value>
+                    <value label="B Post">bpost</value>
+                    <value label="Exapaq">exapaq</value>
+                    <value label="Lettre suivie">lettresuivie</value>
+                    <value label="Paquet prio">paquetprio</value>
+                    <value label="Colis privé">colisprive</value>
+                    <value label="GLS">GLS</value>
+                    <value label="Royal Mail">royalmail</value>
+                    <value label="UPS">UPS</value>
+                    <value label="Priority Mail">prioritymail</value>
+                    <value label="USPS">usps</value>
+                    <value label="Lettre Max">LETTREMAX</value>
+                    <value label="Hermes">HERMES</value>
+                    <value label="FEDEX">FEDEX</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="boulanger" realname="Boulanger" idshopbot="1791">
+        <api>https://wsdl.lengow.com/wsdl/boulanger/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="beslist" realname="Beslist" idshopbot="915">
+        <api>https://wsdl.lengow.com/wsdl/beslist/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states name="shipped">
+            <lengow>shipped</lengow>
+        </states>
+        <states name="new">
+            <lengow>new</lengow>
+            <actions>
+                <action type="shipped">shipped</action>
+            </actions>
+        </states>
+        <states name="processing">
+            <lengow>processing</lengow>
+            <actions>
+                <action type="shipped">shipped</action>
+            </actions>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="macway" realname="MacWay" idshopbot="2107">
+        <api>https://wsdl.lengow.com/wsdl/macway/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="fyndiq" realname="Fyndiq" idshopbot="2087">
+        <api>https://wsdl.lengow.com/wsdl/fyndiq/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="new">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">ship</action>
+                </actions>
+            </state>
+
+            <state name="sent">
+                <lengow>shipped</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="PostNord">PostNord</value>
+                    <value label="Schenker">Schenker</value>
+                    <value label="DHL">DHL</value>
+                    <value label="Bring">Bring</value>
+                    <value label="Deutsche Post">Deutsche Post</value>
+                    <value label="DPD">DPD</value>
+                    <value label="GLS">GLS</value>
+                    <value label="UPS">UPS</value>
+                    <value label="Hermes">Hermes</value>
+
+                </accepted_values>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="hitmeister" realname="Hitmeister" idshopbot="1051">
+        <api>https://wsdl.lengow.com/wsdl/hitmeister/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="received">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="sent">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="cancelled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="sent_and_autopaid">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="returned">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="need_to_be_sent">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">ship</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Computeruniverse">Computeruniverse</value>
+                    <value label="DHL">DHL</value>
+                    <value label="DHL 2 MH">DHL 2 MH</value>
+                    <value label="DHL Freight">DHL Freight</value>
+                    <value label="dtl">dtl</value>
+                    <value label="DPD">DPD</value>
+                    <value label="Deutsche Post">Deutsche Post</value>
+                    <value label="Dachser">Dachser</value>
+                    <value label="Emons">Emons</value>
+                    <value label="Fedex">Fedex</value>
+                    <value label="GLS">GLS</value>
+                    <value label="GEL">GEL</value>
+                    <value label="Hermes">Hermes</value>
+                    <value label="Hermes 2 MH">Hermes 2 MH</value>
+                    <value label="Hellmann">Hellmann</value>
+                    <value label="Iloxx">Iloxx</value>
+                    <value label="Kuehne &amp; Nagel">Kuehne &amp; Nagel</value>
+                    <value label="Rhenus">Rhenus</value>
+                    <value label="Other">Other</value>
+                    <value label="Schenker">Schenker</value>
+                    <value label="Spedition Guettler">Spedition Guettler</value>
+                    <value label="TNT">TNT</value>
+                    <value label="trans-o-flex">trans-o-flex</value>
+                    <value label="UPS">UPS</value>
+                </accepted_values>
+            </param>
+            <param usedby="cancel">
+                <type>reason</type>
+                <name>reason</name>
+                <accepted_values>
+                    <value label="GeneralAdjustment">GeneralAdjustment</value>
+                    <value label="BuyerCancelled">BuyerCancelled</value>
+                    <value label="CustomerExchange">CustomerExchange</value>
+                    <value label="CustomerReturn">CustomerReturn</value>
+                    <value label="ShippingAddressUndeliverable">ShippingAddressUndeliverable</value>
+                    <value label="WrongCatalogData">WrongCatalogData</value>
+                    <value label="MerchandiseNotReceived">MerchandiseNotReceived</value>
+                    <value label="NoInventory">NoInventory</value>
+                    <value label="WrongPrice">WrongPrice</value>
+                    <value label="UndeliverableRegion">UndeliverableRegion</value>
+                </accepted_values>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="outiz">
+        <api>https://wsdl.lengow.com/wsdl/outiz/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="CHRONOPOST" default="true">chr</value>
+                    <value label="CIBLEX">cib</value>
+                    <value label="COLIPOSTE PARTICULIER (Colissimo, Colissimo International)">cpart</value>
+                    <value label="COLIPOSTE PRO">cpro</value>
+                    <value label="COURRIER SUIVI, LETTRE MAX, LETTRE SUIVIE, LETTRE RECOMMANDEE">cos</value>
+                    <value label="DHL">dhl</value>
+                    <value label="DPD">dpd</value>
+                    <value label="EXAPAQ">exa</value>
+                    <value label="FEDEX">fed</value>
+                    <value label="GEFCO">gef</value>
+                    <value label="GLS">gls</value>
+                    <value label="SCHENKER">sch</value>
+                    <value label="UPS">ups</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="atlasformen">
+        <api>https://wsdl.lengow.com/wsdl/atlasformen/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Colissimo" default="true">colissimo</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="carrefour_es">
+        <api>https://wsdl.lengow.com/wsdl/carrefour_es/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Seur" default="true">seur</value>
+                    <value label="Nacex">nacex</value>
+                    <value label="MRW">mrw</value>
+                    <value label="Correos">correos</value>
+                    <value label="DHL">dhl</value>
+                    <value label="UPS">ups</value>
+                    <value label="Envilia">envilia</value>
+                    <value label="ASM">asm</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="wish" idshopbot="2103" realname="Wish.com">
+        <api>https://wsdl.lengow.com/wsdl/wish/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="APPROVED">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">ship</action>
+                    <action type="refuse">refuse</action>
+                </actions>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="REQUIRE_REVIEW">
+                <lengow>processing</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Colissimo" default="True">Colissimo</value>
+                    <value label="USPS">USPS</value>
+                    <value label="FedEx">FedEx</value>
+                    <value label="DHL">DHL</value>
+                    <value label="UPS">UPS</value>
+                    <value label="OnTrac">OnTrac</value>
+                    <value label="FlytExpress">FlytExpress</value>
+                    <value label="CanadaPost">CanadaPost</value>
+                    <value label="HongKongPost">HongKongPost</value>
+                    <value label="ChinaAirPost">ChinaAirPost</value>
+                    <value label="SingaporePost">SingaporePost</value>
+                    <value label="IsraelPost">IsraelPost</value>
+                    <value label="TurkishPost">TurkishPost</value>
+                    <value label="EMS (China)">EMS (China)</value>
+                    <value label="SwissPost">SwissPost</value>
+                    <value label="IndiaPost">IndiaPost</value>
+                    <value label="BPost">BPost</value>
+                    <value label="IndonesiaPost">IndonesiaPost</value>
+                    <value label="ThailandThaiPost">ThailandThaiPost</value>
+                    <value label="UPSMailInnovations">UPSMailInnovations</value>
+                    <value label="TNT">TNT</value>
+                    <value label="DPD">DPD</value>
+                    <value label="Aramex">Aramex</value>
+                    <value label="DHLGlobalMail">DHLGlobalMail</value>
+                    <value label="Purolator">Purolator</value>
+                    <value label="DirectLink">DirectLink</value>
+                    <value label="YRC">YRC</value>
+                    <value label="UPSFreight">UPSFreight</value>
+                    <value label="AsendiaUSA">AsendiaUSA</value>
+                    <value label="Evergreen">Evergreen</value>
+                    <value label="LaserShip">LaserShip</value>
+                    <value label="Estes">Estes</value>
+                    <value label="ABF">ABF</value>
+                    <value label="RLCarriers">RLCarriers</value>
+                    <value label="RoyalMail">RoyalMail</value>
+                    <value label="ParcelForce">ParcelForce</value>
+                    <value label="FedExUK">FedExUK</value>
+                    <value label="DPDUK">DPDUK</value>
+                    <value label="TNTUK">TNTUK</value>
+                    <value label="UKMail">UKMail</value>
+                    <value label="InterlinkExpress">InterlinkExpress</value>
+                    <value label="YODEL">YODEL</value>
+                    <value label="Hermes">Hermes</value>
+                    <value label="CityLink">CityLink</value>
+                    <value label="FastwayIreland">FastwayIreland</value>
+                    <value label="DeutschePost">DeutschePost</value>
+                    <value label="DHLGermany">DHLGermany</value>
+                    <value label="HermesGermany">HermesGermany</value>
+                    <value label="DPDGermany">DPDGermany</value>
+                    <value label="AustrianPost">AustrianPost</value>
+                    <value label="CorreosDeEspana">CorreosDeEspana</value>
+                    <value label="NACEXSpain">NACEXSpain</value>
+                    <value label="MRW">MRW</value>
+                    <value label="SpanishSeur">SpanishSeur</value>
+                    <value label="InternationalSeur">InternationalSeur</value>
+                    <value label="PortugalCTT">PortugalCTT</value>
+                    <value label="ChronopostPortugal">ChronopostPortugal</value>
+                    <value label="PortugalSeur">PortugalSeur</value>
+                    <value label="LaPosteColissimo">LaPosteColissimo</value>
+                    <value label="ChronopostFrance">ChronopostFrance</value>
+                    <value label="PostNL">PostNL</value>
+                    <value label="DHLNetherlands">DHLNetherlands</value>
+                    <value label="Selektvracht">Selektvracht</value>
+                    <value label="GLS">GLS</value>
+                    <value label="DeltecCourier">DeltecCourier</value>
+                    <value label="DHLBenelux">DHLBenelux</value>
+                    <value label="AnPost">AnPost</value>
+                    <value label="ItellaPosti">ItellaPosti</value>
+                    <value label="PostenNorge">PostenNorge</value>
+                    <value label="SwedenPosten">SwedenPosten</value>
+                    <value label="ItalySDA">ItalySDA</value>
+                    <value label="PosteItalianePaccocelere">PosteItalianePaccocelere</value>
+                    <value label="PosteItaliane">PosteItaliane</value>
+                    <value label="DanmarkPost">DanmarkPost</value>
+                    <value label="TNTItaly">TNTItaly</value>
+                    <value label="RussianPost">RussianPost</value>
+                    <value label="NovaPoshta">NovaPoshta</value>
+                    <value label="DHLPoland">DHLPoland</value>
+                    <value label="PocztaPolska">PocztaPolska</value>
+                    <value label="DPDPoland">DPDPoland</value>
+                    <value label="Siodemka">Siodemka</value>
+                    <value label="OPEK">OPEK</value>
+                    <value label="UkrPoshta">UkrPoshta</value>
+                    <value label="CeskaPosta">CeskaPosta</value>
+                    <value label="EltaCourier">EltaCourier</value>
+                    <value label="PTTPosta">PTTPosta</value>
+                    <value label="KuehneNagel">KuehneNagel</value>
+                    <value label="4PX">4PX</value>
+                    <value label="SFExpress">SFExpress</value>
+                    <value label="DHLGlobalMailAsia">DHLGlobalMailAsia</value>
+                    <value label="TAQBINHongKong">TAQBINHongKong</value>
+                    <value label="TGX">TGX</value>
+                    <value label="SingaporeSpeedpost">SingaporeSpeedpost</value>
+                    <value label="TAQBINSingapore">TAQBINSingapore</value>
+                    <value label="Bluedart">Bluedart</value>
+                    <value label="Safexpress">Safexpress</value>
+                    <value label="RedExpress">RedExpress</value>
+                    <value label="FirstFlightCouriers">FirstFlightCouriers</value>
+                    <value label="GatiKWE">GatiKWE</value>
+                    <value label="JapanPost">JapanPost</value>
+                    <value label="Sagawa">Sagawa</value>
+                    <value label="TaiwanPost">TaiwanPost</value>
+                    <value label="MalaysiaPost">MalaysiaPost</value>
+                    <value label="MalaysiaPostPosDaftar">MalaysiaPostPosDaftar</value>
+                    <value label="SkynetMalaysia">SkynetMalaysia</value>
+                    <value label="CambodiaPost">CambodiaPost</value>
+                    <value label="KoreaPost">KoreaPost</value>
+                    <value label="AustraliaPost">AustraliaPost</value>
+                    <value label="TollPriority">TollPriority</value>
+                    <value label="TollGlobalExpress">TollGlobalExpress</value>
+                    <value label="TNTAustralia">TNTAustralia</value>
+                    <value label="StarTrackAustralia">StarTrackAustralia</value>
+                    <value label="NewZealandPost">NewZealandPost</value>
+                    <value label="BrazilCorreios">BrazilCorreios</value>
+                    <value label="FlashCourier">FlashCourier</value>
+                    <value label="SouthAfricanPostOffice">SouthAfricanPostOffice</value>
+                    <value label="FastwaySouthAfrica">FastwaySouthAfrica</value>
+                    <value label="CorreosChile">CorreosChile</value>
+                    <value label="SaudiPost">SaudiPost</value>
+                    <value label="NiPost">NiPost</value>
+                    <value label="CorreoArgentino">CorreoArgentino</value>
+                    <value label="OCAArgentina">OCAArgentina</value>
+                    <value label="CorreosDeMexico">CorreosDeMexico</value>
+                    <value label="Estafeta">Estafeta</value>
+                    <value label="MexicoSendaExpress">MexicoSendaExpress</value>
+                    <value label="MexicoRedpack">MexicoRedpack</value>
+                    <value label="MexicoMultipack">MexicoMultipack</value>
+                    <value label="MexicoAeroFlash">MexicoAeroFlash</value>
+                    <value label="CyprusPost">CyprusPost</value>
+                    <value label="SkynetWorldwideExpress">SkynetWorldwideExpress</value>
+                    <value label="APCLogistics">APCLogistics</value>
+                    <value label="IParcel">IParcel</value>
+                    <value label="TAQBINMalaysia">TAQBINMalaysia</value>
+                    <value label="HrvatskaPosta">HrvatskaPosta</value>
+                    <value label="RomaniaPost">RomaniaPost</value>
+                    <value label="TAQBINJapan">TAQBINJapan</value>
+                    <value label="RedExpressWaybill">RedExpressWaybill</value>
+                    <value label="CourierPost">CourierPost</value>
+                    <value label="ProfessionalCouriers">ProfessionalCouriers</value>
+                    <value label="GoJaVAS">GoJaVAS</value>
+                    <value label="CJGLS">CJGLS</value>
+                    <value label="ECFirstClass">ECFirstClass</value>
+                    <value label="BulgarianPosts">BulgarianPosts</value>
+                    <value label="PostNLInternational">PostNLInternational</value>
+                    <value label="FastwayAustralia">FastwayAustralia</value>
+                    <value label="KerryLogistics">KerryLogistics</value>
+                    <value label="DTDCIndia">DTDCIndia</value>
+                    <value label="StarTrackExpress">StarTrackExpress</value>
+                    <value label="GDEX">GDEX</value>
+                    <value label="JNE">JNE</value>
+                    <value label="RPXIndonesia">RPXIndonesia</value>
+                    <value label="GLSItaly">GLSItaly</value>
+                    <value label="DPDIreland">DPDIreland</value>
+                    <value label="FirstLogistics">FirstLogistics</value>
+                    <value label="BRTBartolini">BRTBartolini</value>
+                    <value label="Belpost">Belpost</value>
+                    <value label="Xend">Xend</value>
+                    <value label="_2GO">_2GO</value>
+                    <value label="PostNordLogistics">PostNordLogistics</value>
+                    <value label="ACSCourier">ACSCourier</value>
+                    <value label="AIR21">AIR21</value>
+                    <value label="LBCExpress">LBCExpress</value>
+                    <value label="ArrowXL">ArrowXL</value>
+                    <value label="VietnamPostEMS">VietnamPostEMS</value>
+                    <value label="ViettelPost">ViettelPost</value>
+                    <value label="VietnamPost">VietnamPost</value>
+                    <value label="PayPalPackage">PayPalPackage</value>
+                    <value label="LithuaniaPost">LithuaniaPost</value>
+                    <value label="CouriersPlease">CouriersPlease</value>
+                    <value label="PostNLInternational3S">PostNLInternational3S</value>
+                    <value label="ColisPrive">ColisPrive</value>
+                    <value label="ASM">ASM</value>
+                    <value label="AustrianPostRegistered">AustrianPostRegistered</value>
+                    <value label="AuPostChina">AuPostChina</value>
+                    <value label="TNTPostItaly">TNTPostItaly</value>
+                    <value label="Tiki">Tiki</value>
+                    <value label="XDPExpress">XDPExpress</value>
+                    <value label="GLSNetherlands">GLSNetherlands</value>
+                    <value label="RedurSpain">RedurSpain</value>
+                    <value label="TNTFrance">TNTFrance</value>
+                    <value label="JamExpress">JamExpress</value>
+                    <value label="Wahana">Wahana</value>
+                    <value label="CollectPlus">CollectPlus</value>
+                    <value label="DynamicLogistics">DynamicLogistics</value>
+                    <value label="IndiaPostInternational">IndiaPostInternational</value>
+                    <value label="IsraelPostDomestic">IsraelPostDomestic</value>
+                    <value label="BPostInternational">BPostInternational</value>
+                    <value label="DX">DX</value>
+                    <value label="CityLinkExpress">CityLinkExpress</value>
+                    <value label="WeDoLogisitics">WeDoLogisitics</value>
+                    <value label="GeodisCalbersonFrance">GeodisCalbersonFrance</value>
+                    <value label="PosIndonesiaDomestic">PosIndonesiaDomestic</value>
+                    <value label="STOExpress">STOExpress</value>
+                    <value label="TollIPEC">TollIPEC</value>
+                    <value label="JCEX">JCEX</value>
+                    <value label="Delhivery">Delhivery</value>
+                    <value label="DHLParcelNL">DHLParcelNL</value>
+                    <value label="Greyhound">Greyhound</value>
+                    <value label="Yanwen">Yanwen</value>
+                    <value label="RPXOnline">RPXOnline</value>
+                    <value label="PostService">PostService</value>
+                    <value label="GenikiTaxydromiki">GenikiTaxydromiki</value>
+                    <value label="SkynetWorldwideExpressUK">SkynetWorldwideExpressUK</value>
+                    <value label="GHN">GHN</value>
+                    <value label="Envialia">Envialia</value>
+                    <value label="Chukou1">Chukou1</value>
+                    <value label="EPacket">EPacket</value>
+                    <value label="RAF">RAF</value>
+                    <value label="YundaExpress">YundaExpress</value>
+                    <value label="SpecialisedFreight">SpecialisedFreight</value>
+                    <value label="TrakPak">TrakPak</value>
+                    <value label="EquickChina">EquickChina</value>
+                    <value label="DPESouthAfrica">DPESouthAfrica</value>
+                    <value label="EmiratesPost">EmiratesPost</value>
+                    <value label="DPEXChina">DPEXChina</value>
+                    <value label="Qxpress">Qxpress</value>
+                    <value label="CourierPlus">CourierPlus</value>
+                    <value label="CourierIT">CourierIT</value>
+                    <value label="BestExpress">BestExpress</value>
+                    <value label="CityLinkInternational">CityLinkInternational</value>
+                    <value label="DHL2MannHandling">DHL2MannHandling</value>
+                    <value label="DBSchenkerSweden">DBSchenkerSweden</value>
+                    <value label="_4SquareGroup">_4SquareGroup</value>
+                    <value label="XpressBees">XpressBees</value>
+                    <value label="Dotzot">Dotzot</value>
+                    <value label="EcomExpress">EcomExpress</value>
+                    <value label="Mypostonline">Mypostonline</value>
+                    <value label="Panther">Panther</value>
+                    <value label="TNTClickItaly">TNTClickItaly</value>
+                    <value label="YodelInternational">YodelInternational</value>
+                    <value label="BOXC">BOXC</value>
+                    <value label="EMPSExpress">EMPSExpress</value>
+                    <value label="Post56">Post56</value>
+                    <value label="SREKorea">SREKorea</value>
+                    <value label="ChinaPost-WishPost">ChinaPost-WishPost</value>
+                    <value label="DHLSpainDomestic">DHLSpainDomestic</value>
+                    <value label="TransMission">TransMission</value>
+                    <value label="MagyarPosta">MagyarPosta</value>
+                    <value label="Exapaq">Exapaq</value>
+                    <value label="PostaPlus">PostaPlus</value>
+                    <value label="TeliwaySICExpress">TeliwaySICExpress</value>
+                    <value label="Packlink">Packlink</value>
+                    <value label="CNEExpress">CNEExpress</value>
+                    <value label="MyHermesUK">MyHermesUK</value>
+                    <value label="CanparCourier">CanparCourier</value>
+                    <value label="RAM">RAM</value>
+                    <value label="DHLExpress">DHLExpress</value>
+                    <value label="PanduLogistics">PanduLogistics</value>
+                    <value label="SpeedexCourier">SpeedexCourier</value>
+                    <value label="SpeedCourier">SpeedCourier</value>
+                    <value label="AsendiaGermany">AsendiaGermany</value>
+                    <value label="DMMNetwork">DMMNetwork</value>
+                    <value label="SGTCorriereEspresso">SGTCorriereEspresso</value>
+                    <value label="NationwideExpress">NationwideExpress</value>
+                    <value label="GlobegisticsInc">GlobegisticsInc</value>
+                    <value label="DACHSER">DACHSER</value>
+                    <value label="Ecargo">Ecargo</value>
+                    <value label="DawnWing">DawnWing</value>
+                    <value label="CorreosExpress">CorreosExpress</value>
+                    <value label="FERCAM">FERCAM</value>
+                    <value label="JayonExpress">JayonExpress</value>
+                    <value label="DSV">DSV</value>
+                    <value label="SFInternational">SFInternational</value>
+                    <value label="ABXExpress">ABXExpress</value>
+                    <value label="KangarooWorldwideExpress">KangarooWorldwideExpress</value>
+                    <value label="ZJSExpress">ZJSExpress</value>
+                    <value label="Spreadel">Spreadel</value>
+                    <value label="AsendiaUK">AsendiaUK</value>
+                    <value label="APCOvernight">APCOvernight</value>
+                    <value label="BertTransport">BertTransport</value>
+                    <value label="DelivreeKing">DelivreeKing</value>
+                    <value label="CBLLogistics">CBLLogistics</value>
+                    <value label="Newgistics">Newgistics</value>
+                    <value label="EasyMail">EasyMail</value>
+                    <value label="LogisticWorldwideExpress">LogisticWorldwideExpress</value>
+                    <value label="FastrakServices">FastrakServices</value>
+                    <value label="Delcart">Delcart</value>
+                    <value label="FastwayNewZealand">FastwayNewZealand</value>
+                    <value label="NanjingWoyuan">NanjingWoyuan</value>
+                    <value label="UBILogisticsAustralia">UBILogisticsAustralia</value>
+                    <value label="YunExpress">YunExpress</value>
+                    <value label="HomedirectLogistics">HomedirectLogistics</value>
+                    <value label="TuffnellsParcelsExpress">TuffnellsParcelsExpress</value>
+                    <value label="NinjaVan">NinjaVan</value>
+                    <value label="AirpakExpress">AirpakExpress</value>
+                    <value label="BondsCouriers">BondsCouriers</value>
+                    <value label="Nightline">Nightline</value>
+                    <value label="JetShipWorldwide">JetShipWorldwide</value>
+                    <value label="IMXMail">IMXMail</value>
+                    <value label="NorskGlobal">NorskGlobal</value>
+                    <value label="NhansSolutions">NhansSolutions</value>
+                    <value label="CuckooExpress">CuckooExpress</value>
+                    <value label="BosniaandHerzegovinaPost">BosniaandHerzegovinaPost</value>
+                    <value label="ColombiaPostalService">ColombiaPostalService</value>
+                    <value label="Maxcellent">Maxcellent</value>
+                    <value label="ParcelPost">ParcelPost</value>
+                    <value label="GoFly">GoFly</value>
+                    <value label="PostSerbia">PostSerbia</value>
+                    <value label="RZYExpress">RZYExpress</value>
+                    <value label="RRDonnelley">RRDonnelley</value>
+                    <value label="SingParcelService">SingParcelService</value>
+                    <value label="CosmeticsNow">CosmeticsNow</value>
+                    <value label="OneWorldExpress">OneWorldExpress</value>
+                    <value label="Cainiao">Cainiao</value>
+                    <value label="SloveniaPost">SloveniaPost</value>
+                    <value label="EasternExpress">EasternExpress</value>
+                    <value label="CPacket">CPacket</value>
+                    <value label="SFCService">SFCService</value>
+                </accepted_values>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="allyouneed">
+        <api>https://wsdl.lengow.com/wsdl/allyouneed/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="new">
+                <actions>
+                    <action type="shipped">acceptOrder</action>
+                    <action type="refund">refundOrder</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+                <lengow>new</lengow>
+            </state>
+            <state name="OPEN">
+                <actions>
+                    <action type="shipped">acceptOrder</action>
+                    <action type="refund">refundOrder</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+            </param>
+            <param usedby="cancel">
+                <type>reason</type>
+                <name>reason</name>
+            </param>
+            <param usedby="refund">
+                <type>refund_reason</type>
+                <name>refund_reason</name>
+                <accepted_values>
+                    <value label="Look_in_comment" default="True">LOOK_IN_COMMENT</value>
+                    <value label="Used">USED</value>
+                    <value label="Damaged">DAMAGED</value>
+                </accepted_values>
+            </param>
+            <param usedby="refund">
+                <type>reduction_amount</type>
+                <name>reduction_amount</name>
+            </param>
+            <param usedby="refund">
+                <type>delivery_amount</type>
+                <name>delivery_amount</name>
+            </param>
+            <param usedby="refund">
+                <type>comment</type>
+                <name>comment</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="cdon_se">
+        <api>https://wsdl.lengow.com/wsdl/cdon_se/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="Pending">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="shipped">ship</action>
+                    <action type="refund">refuse</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+            </state>
+            <state name="Delivered">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="Returned">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Cancelled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Invoiced">
+                <lengow>processing</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="cdon_dk">
+        <api>https://wsdl.lengow.com/wsdl/cdon_dk/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="Pending">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="shipped">ship</action>
+                    <action type="refund">refuse</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+            </state>
+            <state name="Delivered">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="Returned">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Cancelled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Invoiced">
+                <lengow>processing</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="cdon_no">
+        <api>https://wsdl.lengow.com/wsdl/cdon_no/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="Pending">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="shipped">ship</action>
+                    <action type="refund">refuse</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+            </state>
+            <state name="Delivered">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="Returned">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Cancelled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Invoiced">
+                <lengow>processing</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="cdon_fi">
+        <api>https://wsdl.lengow.com/wsdl/cdon_fi/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="Pending">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="shipped">ship</action>
+                    <action type="refund">refuse</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+            </state>
+            <state name="Delivered">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="Returned">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Cancelled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Invoiced">
+                <lengow>processing</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="bol">
+        <api>https://wsdl.lengow.com/wsdl/bol/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="new">
+                <actions>
+                    <action type="shipped">acceptOrder</action>
+                    <action type="refund">refundOrder</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+                <lengow>new</lengow>
+            </state>
+            <state name="processing">
+                <actions>
+                    <action type="shipped">acceptOrder</action>
+                    <action type="refund">refundOrder</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+                <lengow>processing</lengow>
+            </state>
+            <state name="shipped">
+                <actions>
+                    <action type="refund">refundOrder</action>
+                </actions>
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="returned">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+            </param>
+            <param usedby="shipped">
+                <type>ship_date</type>
+                <name>ship_date</name>
+            </param>
+            <param usedby="shipped">
+                <type>expected_delivery_date</type>
+                <name>expected_delivery_date</name>
+            </param>
+            <param usedby="cancel">
+                <type>reason</type>
+                <name>reason</name>
+                <accepted_values>
+                    <value label="OUT_OF_STOCK" default="True">OUT_OF_STOCK</value>
+                    <value label="REQUESTED_BY_CUSTOMER">REQUESTED_BY_CUSTOMER</value>
+                    <value label="BAD_CONDITION">BAD_CONDITION</value>
+                    <value label="HIGHER_SHIPCOST">HIGHER_SHIPCOST</value>
+                    <value label="INCORRECT_PRICE">INCORRECT_PRICE</value>
+                    <value label="NOT_AVAIL_IN_TIME">NOT_AVAIL_IN_TIME</value>
+                    <value label="NO_BOL_GUARANTEE">NO_BOL_GUARANTEE</value>
+                    <value label="ORDERED_TWICE">ORDERED_TWICE</value>
+                    <value label="RETAIN_ITEM">RETAIN_ITEM</value>
+                    <value label="TECH_ISSUE">TECH_ISSUE</value>
+                    <value label="UNFINDABLE_ITEM">UNFINDABLE_ITEM</value>
+                    <value label="OTHER">OTHER</value>
+                </accepted_values>
+            </param>
+            <param usedby="refund">
+                <type>status_reason</type>
+                <name>status_reason</name>
+                <accepted_values>
+                    <value label="PRODUCT_RECEIVED" default="True">PRODUCT_RECEIVED</value>
+                    <value label="REPAIRED_OR_EXCHANGED">REPAIRED_OR_EXCHANGED</value>
+                    <value label="FAILS_TO_MATCH_RETURN_CONDITIONS">FAILS_TO_MATCH_RETURN_CONDITIONS</value>
+                    <value label="CUSTOMER_KEEPS_PRODUCT">CUSTOMER_KEEPS_PRODUCT</value>
+                </accepted_values>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="teeps">
+        <api>https://wsdl.lengow.com/wsdl/teeps/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="Initial">
+                <lengow>new</lengow>
+            </state>
+            <state name="Expired">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Ongoing">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Valid">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Direct Payment">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Pending Payment">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Pending Payment Paypal">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Pending Payment Bank Wire">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Not authorized">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Authorization cancelled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Authorized (?)">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Payment Authorized">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Partially Confirmed">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Paid">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Confirmed">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Sent">
+                <lengow>shipped</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="Received">
+                <lengow>complete</lengow>
+            </state>
+            <state name="Finalized">
+                <lengow>complete</lengow>
+            </state>
+            <state name="Return in progress">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Partially Returned">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Returned">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Pending Payment Cheque">
+                <lengow>pending</lengow>
+            </state>
+            <state name="Payment partial failure">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Payment failure">
+                <lengow>processing</lengow>
+            </state>
+            <state name="Cancelled">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="Deleted">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>carrier_name</type>
+                <name>carrier_name</name>
+                <accepted_values>
+                    <value label="Chronopost" default="true">chronopost</value>
+                    <value label="Lapostecourriersuivi" default="true">lapostecourriersuivi</value>
+                    <value label="Chronorelais" default="true">chronorelais</value>
+                    <value label="Colissimo" default="true">colissimo</value>
+                    <value label="Ups" default="true">ups</value>
+                    <value label="Fedex" default="true">fedex</value>
+                    <value label="Dhl" default="true">dhl</value>
+                    <value label="Usps" default="true">usps</value>
+                    <value label="Tnt" default="true">tnt</value>
+                    <value label="Parcelforce" default="true">parcelforce</value>
+                    <value label="Exapaq" default="true">exapaq</value>
+                    <value label="Gls" default="true">gls</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="eprice">
+        <api>https://wsdl.lengow.com/wsdl/eprice/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_code</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="SDA" default="true">sda</value>
+                    <value label="TNT">tnt</value>
+                    <value label="GLS">gls</value>
+                    <value label="FEDEX">fedex</value>
+                    <value label="DHL">dhl</value>
+                    <value label="BRT">brt</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="harveynichols" realname="Harvey Nichols" idshopbot="2293">
+        <api>https://wsdl.lengow.com/wsdl/harveynichols/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="STAGING">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_ACCEPTANCE">
+                <lengow>new</lengow>
+                <actions>
+                    <action type="accept">accept</action>
+                    <action type="refuse">canceled</action>
+                </actions>
+            </state>
+            <state name="WAITING_DEBIT">
+                <lengow>new</lengow>
+            </state>
+            <state name="WAITING_DEBIT_PAYMENT">
+                <lengow>new</lengow>
+            </state>
+            <state name="SHIPPING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                </actions>
+            </state>
+            <state name="RECEIVED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="SHIPPED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="CANCELED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="CLOSED">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="REFUSED">
+                <lengow>canceled</lengow>
+            </state>
+            <state name="INCIDENT_OPEN">
+                <lengow>processing</lengow>
+            </state>
+            <state name="INCIDENT_CLOSED">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND">
+                <lengow>processing</lengow>
+            </state>
+            <state name="WAITING_REFUND_PAYMENT">
+                <lengow>processing</lengow>
+            </state>
+            <state name="REFUNDED">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_code</name>
+                <accepted_values>
+                    <value label="Fed Ex" default="true">FEDEX</value>
+                    <value label="UPS">UPS</value>
+                    <value label="Interlink">IL</value>
+                    <value label="DHL">DHL</value>
+                    <value label="Royal Mail">RM</value>
+                    <value label="DPD">DPD</value>
+                    <value label="TNT">TNT</value>
+                    <value label="Parcelforce">PF</value>
+                </accepted_values>
+            </param>
+            <param usedby="shipped">
+                <type>carrier_name</type>
+                <name>carrier_name</name>
+            </param>
+            <param usedby="shipped">
+                <type>tracking_url</type>
+                <name>tracking_url</name>
+            </param>
+        </additional_params>
+    </marketplace>
+    <marketplace name="idealo_de">
+        <api>https://wsdl.lengow.com/wsdl/idealo_de/#ID_FLUX#/#ORDER_ID#/#ACTION#.xml</api>
+        <states>
+            <state name="PROCESSING">
+                <lengow>processing</lengow>
+                <actions>
+                    <action type="shipped">shipped</action>
+                    <action type="cancel">cancel</action>
+                </actions>
+            </state>
+            <state name="shipped">
+                <lengow>shipped</lengow>
+            </state>
+            <state name="canceled">
+                <lengow>canceled</lengow>
+            </state>
+        </states>
+        <additional_params>
+            <param usedby="shipped">
+                <type>tracking</type>
+                <name>tracking_number</name>
+            </param>
+            <param usedby="shipped">
+                <type>carrier</type>
+                <name>carrier_name</name>
+                <accepted_values>
+                    <value label="Cargo">Cargo</value>
+                    <value label="Hermes">Hermes</value>
+                    <value label="DHL">DHL</value>
+                    <value label="eparcel">eparcel</value>
+                    <value label="primeMail">primeMail</value>
+                    <value label="paket.ag">paket.ag</value>
+                    <value label="GLS">GLS</value>
+                    <value label="FedEx">FedEx</value>
+                    <value label="GdSK">GdSK</value>
+                    <value label="TOMBA">TOMBA</value>
+                    <value label="iloxx">iloxx</value>
+                    <value label="Der Courier">Der Courier</value>
+                    <value label="GO!">GO!</value>
+                    <value label="Noxxs Logistic">Noxxs Logistic</value>
+                    <value label="DPD">DPD</value>
+                    <value label="UPS">UPS</value>
+                    <value label="Midway">Midway</value>
+                    <value label="Deutsche Post">Deutsche Post</value>
+                </accepted_values>
+            </param>
+        </additional_params>
     </marketplace>
 </marketplaces>

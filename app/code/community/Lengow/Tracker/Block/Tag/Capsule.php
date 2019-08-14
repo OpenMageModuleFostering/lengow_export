@@ -3,11 +3,14 @@
 /**
  * Lengow_Tracker Tracking Block Capsule
  *
- * @category   Lengow
- * @package    Lengow_Tracker
- * @author     Romain Le Polh <romain@lengow.com>
+ * @category    Lengow
+ * @package     Lengow_Tracker
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
+class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template
+{
 
     protected $_data = array();
 
@@ -27,128 +30,148 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
     static private $_IDS_PRODUCTS_CART = '';
     static private $_ID_CATEGORY = '';
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setData('config_model', Mage::getSingleton('lentracker/config'));
         $this->setData('capsule_model', Mage::getSingleton('lentracker/capsule'));
         $this->setData('id_client', $this->getData('config_model')->get('general/login'));
-
         // explode group id => force 1 group only
         $id_groups = $this->getData('config_model')->get('general/group');
-        $id_groups = explode(',', $id_groups);
+        $id_groups = explode(',', $this->_cleanGroup($id_groups));
         $this->setData('id_group', $id_groups[0]);
-
         $this->setData('current_view', Mage::app()->getRequest()->getActionName());
     }
 
-    protected function _prepareLayout() {
+    protected function _prepareLayout()
+    {
         parent::_prepareLayout();
-
-        // Page type
-        $current_module = Mage::app()->getFrontController()->getRequest()->getModuleName();
-        $current_controller = Mage::app()->getFrontController()->getRequest()->getControllerName();
-        $current_action = '';
-
-        if(Mage::getBlockSingleton('page/html_header')->getIsHomePage()) {
-            self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_HOMEPAGE;
-        } else if ($current_module == 'catalog') {
-            if ($current_controller == 'category')
-                self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE_LIST;
-            else if ($current_controller == 'product')
-                self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE;
-        } else if ($current_module == 'checkout') {
-
-            $current_action = Mage::app()->getRequest()->getActionName();
-
-            if ($current_action == 'success')
-                self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE_CONFIRMATION;
-            else if ($current_controller == 'cart')
-                self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE_CART;
-            else if ($current_controller == 'onepage')
-                self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE;
-       }
-
-        // Order total
-        if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CART ||
+        if ((int)Mage::getStoreConfig('lentracker/general/version2')) {
+            // Page type
+            $current_module = Mage::app()->getFrontController()->getRequest()->getModuleName();
+            $current_controller = Mage::app()->getFrontController()->getRequest()->getControllerName();
+            $current_action = '';
+            if (Mage::getBlockSingleton('page/html_header')->getIsHomePage()) {
+                self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_HOMEPAGE;
+            } else {
+                if ($current_module == 'catalog') {
+                    if ($current_controller == 'category') {
+                        self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE_LIST;
+                    } else {
+                        if ($current_controller == 'product') {
+                            self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE;
+                        }
+                    }
+                } else {
+                    if ($current_module == 'checkout') {
+                        $current_action = Mage::app()->getRequest()->getActionName();
+                        if ($current_action == 'success') {
+                            self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE_CONFIRMATION;
+                        } else {
+                            if ($current_controller == 'cart') {
+                                self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE_CART;
+                            } else {
+                                if ($current_controller == 'onepage') {
+                                    self::$_CURRENT_PAGE_TYPE = self::LENGOW_TRACK_PAGE;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // Order total
+            if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CART ||
                 self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_PAYMENT ||
-                $current_module == 'checkout' && $current_action != 'success') {
-            $quote = Mage::getModel('checkout/cart')->getQuote();
-            self::$_ORDER_TOTAL = round($quote->getGrandTotal(), 2);
-        } else if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
-            $order_id = Mage::getSingleton('checkout/session')->getLastOrderId();
-            $order = Mage::getModel('sales/order')->load($order_id);
-            self::$_ORDER_TOTAL = round($order->getGrandTotal(), 2);
-        }
-
-        // Order id - Lead / Payment / Confirmation
-        if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
-            self::$_ID_ORDER = Mage::getSingleton('checkout/session')->getLastRealOrderId();
-        }
-
-        // Ids Products - Page / Listpage / Basket / Payment / Confirmation
-        if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CART ||
+                $current_module == 'checkout' && $current_action != 'success'
+            ) {
+                $quote = Mage::getModel('checkout/cart')->getQuote();
+                self::$_ORDER_TOTAL = round($quote->getGrandTotal(), 2);
+            } else {
+                if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
+                    $order_id = Mage::getSingleton('checkout/session')->getLastOrderId();
+                    $order = Mage::getModel('sales/order')->load($order_id);
+                    self::$_ORDER_TOTAL = round($order->getGrandTotal(), 2);
+                }
+            }
+            // Order id - Lead / Payment / Confirmation
+            if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
+                self::$_ID_ORDER = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+            }
+            // Ids Products - Page / Listpage / Basket / Payment / Confirmation
+            if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CART ||
                 self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_PAYMENT ||
-                $current_module == 'checkout'  && $current_action != 'success') {
-            // Get current quote
-            $quote = Mage::getModel('checkout/cart')->getQuote();
-            self::$_IDS_PRODUCTS = $this->getData('capsule_model')->getIdsProducts($quote);
-        } else if(self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_LIST) {
-            self::$_IDS_PRODUCTS =  $this->_getCurrentProductsIds();
-        } else if(self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE) {
-            self::$_IDS_PRODUCTS =  $this->_getCurrentProductId();
-        } else if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
-            // Get last order
-            $order_id = Mage::getSingleton('checkout/session')->getLastOrderId();
-            $order = Mage::getModel('sales/order')->load($order_id);
-            self::$_IDS_PRODUCTS = $this->getData('capsule_model')->getIdsProducts($order);
+                $current_module == 'checkout' && $current_action != 'success'
+            ) {
+                // Get current quote
+                $quote = Mage::getModel('checkout/cart')->getQuote();
+                self::$_IDS_PRODUCTS = $this->getData('capsule_model')->getIdsProductsV2($quote);
+            } else {
+                if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_LIST) {
+                    self::$_IDS_PRODUCTS = $this->_getCurrentProductsIds();
+                } else {
+                    if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE) {
+                        self::$_IDS_PRODUCTS = $this->_getCurrentProductId();
+                    } else {
+                        if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
+                            // Get last order
+                            $order_id = Mage::getSingleton('checkout/session')->getLastOrderId();
+                            $order = Mage::getModel('sales/order')->load($order_id);
+                            self::$_IDS_PRODUCTS = $this->getData('capsule_model')->getIdsProductsV2($order);
+                        }
+                    }
+                }
+            }
+            // List product in basket - Basket - Confirmation
+            if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CART ||
+                $current_module == 'checkout' && $current_action != 'success'
+            ) {
+                $quote = Mage::getModel('checkout/cart')->getQuote();
+                self::$_IDS_PRODUCTS_CART = $this->getData('capsule_model')->getProductsCart($quote);
+            } else {
+                if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
+                    $order_id = Mage::getSingleton('checkout/session')->getLastOrderId();
+                    $order = Mage::getModel('sales/order')->load($order_id);
+                    self::$_IDS_PRODUCTS_CART = $this->getData('capsule_model')->getProductsCart($order);
+                }
+            }
+            // Id categorie
+            if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_LIST) {
+                self::$_ID_CATEGORY = Mage::registry('current_category')->getName();
+            }
+            // Use SSL
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+                self::$_USE_SSL = true;
+            }
+            // Assign data
+            $this->setData('type_page', self::$_CURRENT_PAGE_TYPE);
+            $this->setData('id_order', self::$_ID_ORDER);
+            $this->setData('order_total', self::$_ORDER_TOTAL);
+            $this->setData('id_category', self::$_ID_CATEGORY);
+            $this->setData('ids_products', self::$_IDS_PRODUCTS);
+            $this->setData('list_products', self::$_IDS_PRODUCTS_CART);
+            $this->setData('use_ssl', self::$_USE_SSL == true ? 'true' : 'false');
+            $this->setData('controller', $current_controller);
+            $this->setData('module', $current_module);
+            $this->setData('current_action', $current_action);
+            $this->setTemplate('lengow/tracker/tagcapsule.phtml');
         }
-
-        // List product in basket - Basket - Confirmation
-        if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CART ||
-                $current_module == 'checkout' && $current_action != 'success') {
-            $quote = Mage::getModel('checkout/cart')->getQuote();
-            self::$_IDS_PRODUCTS_CART = $this->getData('capsule_model')->getProductsCart($quote);
-        } else if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_CONFIRMATION) {
-            $order_id = Mage::getSingleton('checkout/session')->getLastOrderId();
-            $order = Mage::getModel('sales/order')->load($order_id);
-            self::$_IDS_PRODUCTS_CART = $this->getData('capsule_model')->getProductsCart($order);
-        }
-
-        // Id categorie
-        if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_LIST)
-            self::$_ID_CATEGORY = Mage::registry('current_category')->getName();
-
-        // Use SSL
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')
-            self::$_USE_SSL = true;
-
-        // Assign data
-        $this->setData('type_page', self::$_CURRENT_PAGE_TYPE);
-        $this->setData('id_order', self::$_ID_ORDER);
-        $this->setData('order_total', self::$_ORDER_TOTAL);
-        $this->setData('id_category', self::$_ID_CATEGORY);
-        $this->setData('ids_products', self::$_IDS_PRODUCTS);
-        $this->setData('list_products', self::$_IDS_PRODUCTS_CART);
-        $this->setData('use_ssl', self::$_USE_SSL == true ? 'true' : 'false');
-        $this->setData('controller', $current_controller);
-        $this->setData('module', $current_module);
-        $this->setData('current_action', $current_action);
-
-        $this->setTemplate('lengow/tracker/tagcapsule.phtml');
         return $this;
     }
 
-    protected function _getCurrentProductId() {
+    protected function _getCurrentProductId()
+    {
         $config = Mage::getModel('lentracker/config');
-        if($product = Mage::registry('product'))
+        if ($product = Mage::registry('product')) {
             return $product->getData($config->get('tag/identifiant'));
+        }
         return '';
     }
 
-    protected function _getCurrentProductsIds($implode = true) {
+    protected function _getCurrentProductsIds($implode = true)
+    {
         $config = Mage::getModel('lentracker/config');
         $ids = array();
         $products = $this->_getProductCollection()->getData();
-        if($products) {
+        if ($products) {
             foreach ($products as $product) {
                 $ids[] = $product[$config->get('tag/identifiant')];
             }
@@ -161,14 +184,14 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
      *
      * @return Mage_Eav_Model_Entity_Collection_Abstract
      */
-    protected function _getProductCollection() {
+    protected function _getProductCollection()
+    {
         if (is_null($this->_productCollection)) {
             $layer = $this->getLayer();
             /* @var $layer Mage_Catalog_Model_Layer */
             if ($this->getShowRootCategory()) {
                 $this->setCategoryId(Mage::app()->getStore()->getRootCategoryId());
             }
-
             // if this is a product view page
             if (Mage::registry('product')) {
                 // get collection of categories this product is associated with
@@ -181,7 +204,6 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
                     $this->setCategoryId(current($categories->getIterator()));
                 }
             }
-
             $origCategory = null;
             if ($this->getCategoryId()) {
                 $category = Mage::getModel('catalog/category')->load($this->getCategoryId());
@@ -192,9 +214,7 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
                 }
             }
             $this->_productCollection = $layer->getProductCollection();
-
             $this->prepareSortableFieldsByCategory($layer->getCurrentCategory());
-
             if ($origCategory) {
                 $layer->setCurrentCategory($origCategory);
             }
@@ -202,12 +222,14 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
         return $this->_productCollection;
     }
 
-    protected function _beforeToHtml() {
-        if(self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_LIST) {
+    protected function _beforeToHtml()
+    {
+        if (self::$_CURRENT_PAGE_TYPE == self::LENGOW_TRACK_PAGE_LIST) {
             $config = Mage::getModel('lentracker/config');
+            $ids = array();
             $_list = $this->getLayout()->getBlock('product_list');
             $_products = $_list->getLoadedProductCollection();
-            if($_products) {
+            if ($_products) {
                 foreach ($_products as $product) {
                     $ids[] = $product[$config->get('tag/identifiant')];
                 }
@@ -222,7 +244,8 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
      *
      * @return Mage_Catalog_Model_Layer
      */
-    public function getLayer() {
+    public function getLayer()
+    {
         $layer = Mage::registry('current_layer');
         if ($layer) {
             return $layer;
@@ -236,7 +259,8 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
      * @param Mage_Catalog_Model_Category $category
      * @return Mage_Catalog_Block_Product_List
      */
-    public function prepareSortableFieldsByCategory($category) {
+    public function prepareSortableFieldsByCategory($category)
+    {
         if (!$this->getAvailableOrders()) {
             $this->setAvailableOrders($category->getAvailableSortByOptions());
         }
@@ -253,5 +277,15 @@ class Lengow_Tracker_Block_Tag_Capsule extends Mage_Core_Block_Template {
         }
 
         return $this;
+    }
+
+    /**
+     *  Clean group id
+     *
+     * @param string $data
+     */
+    private function _cleanGroup($data)
+    {
+        return trim(str_replace(array("\r\n", ';', '-', '|', ' '), ',', $data), ',');
     }
 }

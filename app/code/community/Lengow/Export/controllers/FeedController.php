@@ -1,14 +1,16 @@
 <?php
+
 /**
  * Lengow export controller
  *
  * @category    Lengow
  * @package     Lengow_Export
- * @author      Ludovic Drin <ludovic@lengow.com> & Benjamin Le NevÃ© <benjamin.le-neve@lengow.com>
- * @copyright   2015 Lengow SAS
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
+class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action
+{
 
     /**
      * Exports products for each store
@@ -21,7 +23,7 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
         ini_set('memory_limit', '1G');
         $mode = $this->getRequest()->getParam('mode');
         $helper = Mage::helper('lenexport/security');
-        if($helper->checkIp()) {
+        if ($helper->checkIp()) {
             Mage::helper('lensync/data')->log('## Start manual export ##');
             $_configModel = Mage::getSingleton('lenexport/config');
             try {
@@ -34,18 +36,21 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
             // get store
             $storeCode = $this->getRequest()->getParam('code', null);
             if ($storeCode) //if store code is in URL
-                $id_store = (int) Mage::getModel('core/store')->load($storeCode, 'code')->getId();
-            else // if store id is in URL
-                $id_store = (integer) $this->getRequest()->getParam('store', Mage::app()->getStore()->getId());
+            {
+                $id_store = (int)Mage::getModel('core/store')->load($storeCode, 'code')->getId();
+            } else // if store id is in URL
+            {
+                $id_store = (integer)$this->getRequest()->getParam('store', Mage::app()->getStore()->getId());
+            }
 
             // config store
             $_configModel->setStore($id_store);
             Mage::app()->getStore()->setCurrentStore($id_store);
 
             // check if store is enable for export
-            if(Mage::getStoreConfig('lenexport/global/active_store', Mage::app()->getStore($id_store))) {
-                
-                if(Mage::getStoreConfig('lenexport/performances/optimizeexport')) {
+            if (Mage::getStoreConfig('lenexport/global/active_store', Mage::app()->getStore($id_store))) {
+
+                if (Mage::getStoreConfig('lenexport/performances/optimizeexport')) {
                     $generate = Mage::getSingleton('lenexport/generateoptimize');
                 } else {
                     $generate = Mage::getSingleton('lenexport/generate');
@@ -74,16 +79,16 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
                     // translation now works
                     Mage::app()->getTranslator()->init('frontend', true);
                 }
-                if($currency = $this->getRequest()->getParam('currency', null)) {
+                if ($currency = $this->getRequest()->getParam('currency', null)) {
                     $generate->setCurrentCurrencyCode($currency);
                 }
                 Mage::helper('lensync/data')->log('Start manual export in store ' . Mage::app()->getStore($id_store)->getName() . '(' . $id_store . ')');
 
                 try {
-                    if(Mage::getStoreConfig('lenexport/performances/optimizeexport')) {
+                    if (Mage::getStoreConfig('lenexport/performances/optimizeexport')) {
                         $generate->exec(
                             $id_store,
-                            $format, 
+                            $format,
                             array(
                                 'mode' => $mode,
                                 'types' => $types,
@@ -99,11 +104,12 @@ class Lengow_Export_FeedController extends Mage_Core_Controller_Front_Action {
                             )
                         );
                     } else {
-                        $generate->exec($id_store, $mode, $format, $types, $status, $export_child, $out_of_stock, $selected_products, $stream, $limit, $offset, $ids_product);
+                        $generate->exec($id_store, $mode, $format, $types, $status, $export_child, $out_of_stock,
+                            $selected_products, $stream, $limit, $offset, $ids_product);
                     }
                 } catch (Exception $e) {
                     Mage::helper('lensync/data')->log('Stop manual export - Store ' . Mage::app()->getStore($id_store)->getName() . '(' . $id_store . ') - Error: ' . $e->getMessage());
-                    echo 'Error: '.$e->getMessage();
+                    echo 'Error: ' . $e->getMessage();
                     flush();
                 }
             } else {

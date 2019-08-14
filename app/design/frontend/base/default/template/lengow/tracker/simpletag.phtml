@@ -1,4 +1,19 @@
 <!-- Tag_Lengow -->
-<img src="https://tracking.lengow.com/lead.php?idClient=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>&price=<?php echo $this->getData('total_paid'); ?>&idCommande=<?php echo $this->getData('id_order'); ?>&modePaiement=<?php echo $this->getData('mode_paiement'); ?>&listingProduit=<?php echo $this->getData('ids_products'); ?>" alt="" style="width: 1px; height: 1px; border: none;" />
-<img src="https://tracking.lengow.com/leadValidation.php?idClient=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>&idCommande=<?php echo $this->getData('id_order'); ?>" alt="" style="width: 1px; height: 1px; border: none;" />
+<?php if ((int)Mage::getStoreConfig('lentracker/general/version2')) { ?>
+    <img
+        src="https://tracking.lengow.com/lead.php?idClient=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>&price=<?php echo $this->getData('total_paid'); ?>&idCommande=<?php echo $this->getData('id_order'); ?>&modePaiement=<?php echo $this->getData('mode_paiement'); ?>&listingProduit=<?php echo $this->getData('ids_products'); ?>"
+        alt="" style="width: 1px; height: 1px; border: none;"/>
+    <img
+        src="https://tracking.lengow.com/leadValidation.php?idClient=<?php echo $this->getData('id_client'); ?>&idGroup=<?php echo $this->getData('id_group'); ?>&idCommande=<?php echo $this->getData('id_order'); ?>"
+        alt="" style="width: 1px; height: 1px; border: none;"/>
+    
+<?php } ?>
+<?php if ((int)Mage::getStoreConfig('lentracker/general/version3')) { ?>
+    <img
+        src="https://trk.lgw.io/lead?account_id=<?php echo $this->getData('account_id'); ?>&order_ref=<?php echo $this->getData('order_ref'); ?>&amount=<?php echo $this->getData('amount'); ?>&currency=<?php echo $this->getData('currency'); ?>&payment_method=<?php echo $this->getData('payment_method'); ?>&cart=<?php echo $this->getData('cart'); ?>&cart_number=<?php echo $this->getData('cart_number'); ?>&newbiz=<?php echo $this->getData('newbiz'); ?>"
+        alt="" style="width: 1px; height: 1px; border: none;"/>
+    <img
+        src="https://trk.lgw.io/validation?account_id=<?php echo $this->getData('account_id'); ?>&order_ref=<?php echo $this->getData('order_ref'); ?>&payment_method=<?php echo $this->getData('payment_method'); ?>&valid=<?php echo $this->getData('valid'); ?>"
+        alt="" style="width: 1px; height: 1px; border: none;"/>
+<?php } ?>
 <!-- /Tag_Lengow -->

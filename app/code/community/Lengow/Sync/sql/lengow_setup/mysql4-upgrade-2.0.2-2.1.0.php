@@ -3,8 +3,8 @@
 /**
  * @category    Lengow
  * @package     Lengow_Sync
- * @author      Benjamin Le Nevé <benjamin.le-neve@lengow.com>
- * @copyright   2015 Lengow SAS
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  */
 
 $installer = $this;

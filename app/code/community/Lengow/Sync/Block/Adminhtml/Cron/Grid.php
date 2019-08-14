@@ -1,14 +1,16 @@
 <?php
+
 /**
- * Lengow adminhtml cron grid
+ * Lengow sync block adminhtml cron grid
  *
  * @category    Lengow
- * @package     Lengow_Cron
- * @author      Pierre Basile <pierre.basile@lengow.com>
- * @copyright   2015 Lengow SAS
+ * @package     Lengow_Sync
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Sync_Block_Adminhtml_Cron_Grid extends Mage_Adminhtml_Block_Widget_Grid {
+class Lengow_Sync_Block_Adminhtml_Cron_Grid extends Mage_Adminhtml_Block_Widget_Grid
+{
 
     public function __construct()
     {
@@ -36,15 +38,13 @@ class Lengow_Sync_Block_Adminhtml_Cron_Grid extends Mage_Adminhtml_Block_Widget_
 
     protected function _prepareColumns()
     {
-
-
-       $viewHelper = $this->helper('lensync/cron');
+        $viewHelper = $this->helper('lensync/cron');
 
         $this->addColumn('id', array(
-            'header'=> Mage::helper('lensync')->__('ID'),
+            'header' => Mage::helper('lensync')->__('ID'),
             'index' => 'schedule_id',
             'width' => '80px',
-            'type'  => 'text',
+            'type' => 'text',
         ));
         $this->addColumn('job_code', array(
             'header' => Mage::helper('lensync')->__('Code'),
@@ -78,8 +78,8 @@ class Lengow_Sync_Block_Adminhtml_Cron_Grid extends Mage_Adminhtml_Block_Widget_
         $this->addColumn(
             'status',
             array(
-                'header'         => Mage::helper('lensync')->__('Status'),
-                'index'          => 'status',
+                'header' => Mage::helper('lensync')->__('Status'),
+                'index' => 'status',
                 'frame_callback' => array($viewHelper, 'decorateStatus'),
             )
         );
@@ -88,7 +88,6 @@ class Lengow_Sync_Block_Adminhtml_Cron_Grid extends Mage_Adminhtml_Block_Widget_
 
     public function getGridUrl()
     {
-        return $this->getUrl('*/*/grid', array('_current'=>true));
+        return $this->getUrl('*/*/grid', array('_current' => true));
     }
-
 }

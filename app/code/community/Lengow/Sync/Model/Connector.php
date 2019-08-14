@@ -1,132 +1,101 @@
 <?php
 
-/**
- * Copyright 2013 Lengow.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may obtain
- * a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
-
 if (!function_exists('curl_init')) {
-  throw new Lengow_Sync_Model_Connector_Exception('Lengow needs the CURL PHP extension.', -1);
+    throw new Lengow_Sync_Model_Connector_Exception('Lengow needs the CURL PHP extension.', -1);
 }
 if (!function_exists('json_decode')) {
-  throw new Lengow_Sync_Model_Connector_Exception('Lengow needs the JSON PHP extension.', -2);
+    throw new Lengow_Sync_Model_Connector_Exception('Lengow needs the JSON PHP extension.', -2);
 }
 if (!function_exists('simplexml_load_string')) {
-  throw new Lengow_Sync_Model_Connector_Exception('Lengow needs the SIMPLE XML PHP extension.', -3);
+    throw new Lengow_Sync_Model_Connector_Exception('Lengow needs the SIMPLE XML PHP extension.', -3);
 }
 
 /**
- * The Lengow connector API.
+ * Lengow Sync model connector
  *
- * @author Ludovic Drin <ludovic@lengow.com>
- * @copyright 2013 Lengow SAS
+ * @category    Lengow
+ * @package     Lengow_Sync
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Sync_Model_Connector {
+class Lengow_Sync_Model_Connector
+{
 
-    /**
-     * Version.
-     */
-    const VERSION = '1.0.1';
+    const VERSION = '1.0';
 
-    /**
-     * Error.
-     */
     public $error;
 
+    protected $access_token;
+
+    protected $secret;
+
+    protected $token;
+
+    protected $account_id;
+
+    protected $user_id;
+
+    protected $request;
+
+    const LENGOW_API_URL = 'http://api.lengow.io:80';
+
+    const LENGOW_API_SANDBOX_URL = 'http://api.lengow.net:80';
+    
+    
     /**
      * Default options for curl.
      */
     public static $CURL_OPTS = array(
-        //CURLOPT_SSL_VERIFYPEER => false, // Unquote if you want desactivate ssl check
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 300,
-        CURLOPT_USERAGENT      => 'lengow-api-1.0',
+        CURLOPT_TIMEOUT        => 20,
+        CURLOPT_USERAGENT      => 'lengow-php-sdk',
     );
-
-    /**
-     * Lengow webservices domains.
-     */
-    public static $DOMAIN_LENGOW = array(
-        'solution'    => array('protocol' => 'https',
-                               'url' => 'solution.lengow.com',
-                               'format' => 'json'),
-        'api'         => array('protocol' => 'http',
-                               'url' => 'api.lengow.com',
-                               'format' => 'xml'),
-        'statistics'  => array('protocol' => 'http',
-                               'url' => 'statistics.lengow.com',
-                               'format' => 'xml'),
-    );
-
-    /**
-     * Lengow methods API.
-     */
-    public static $API_METHODS_LENGOW = array(
-        'getListingFeeds'               => array('service' => 'solution'),
-        'updateFeed'                    => array('service' => 'solution'),
-        'getHistoryFeed'                => array('service' => 'solution'),
-        'updateInformationsClient'      => array('service' => 'solution'),
-        'getListingGroups'              => array('service' => 'solution'),
-        'createGroup'                   => array('service' => 'solution'),
-        'updateGroup'                   => array('service' => 'solution'),
-        'getListingVip'                 => array('service' => 'solution'),
-        'createVip'                     => array('service' => 'solution'),
-        'updateVip'                     => array('service' => 'solution'),
-        'getLeads'                      => array('service' => 'solution'),
-        'statusLead'                    => array('service' => 'solution'),
-        'updatePrestaInternalOrderId'   => array('service' => 'solution'),
-        'updateTrackingMagento'         => array('service' => 'solution'),
-        'updateRootFeed'                => array('service' => 'solution'),
-        'getRootFeed'                   => array('service' => 'solution'),
-        'updateEcommerceSolution'       => array('service' => 'solution'),
-        'getInternalOrderId'            => array('service' => 'solution'),
-        'statistics'                    => array('service' => 'statistics'),
-        'commands'                      => array('service' => 'api'),
-    );
-
-    /**
-     * Lengow token.
-     */
-    public $token;
-
-    /**
-     * Lengow ID customer.
-     */
-    public $id_customer;
 
     /**
      * Make a new Lengow API Connector.
      *
-     * @param integer $id_customer Your customer ID.
-     * @param varchar $token Your token Lengow API.
+     * @param varchar $access_token Your access token.
+     * @param varchar $secret Your secret.
      */
-    public function init($id_customer, $token) {
-        try {
-            if (is_integer($id_customer))
-                $this->id_customer = $id_customer;
-            else
-                throw new Lengow_Sync_Model_Connector_Exception('Error Lengow Customer ID', 1);
-            if (strlen($token) > 10)
-                $this->token = $token;
-            else
-                throw new Lengow_Sync_Model_Connector_Exception('Error Lengow Token API', 2);
-        } catch (Lengow_Sync_Model_Connector_Exception $e) {
-            $this->error = $e;
+    public function init($access_token, $secret)
+    {
+        $this->access_token = $access_token;
+        $this->secret = $secret;
+    }
+
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
+     * Connectection to the API
+     *
+     * @param varchar $user_token The user token if is connected
+     *
+     * @return mixed array [authorized token + account_id + user_id] or false
+     */
+    public function connect($user_token = '')
+    {
+        $data = $this->_callAction(
+            '/access/get_token',
+            array(
+                'access_token' => $this->access_token,
+                'secret'       => $this->secret,
+                'user_token'   => $user_token
+            ),
+            'POST'
+        );
+        if (isset($data['token'])) {
+            $this->token = $data['token'];
+            $this->account_id = $data['account_id'];
+            $this->user_id = $data['user_id'];
+            return $data;
+        } else {
             return false;
         }
-        return true;
     }
 
     /**
@@ -134,167 +103,147 @@ class Lengow_Sync_Model_Connector {
      *
      * @param varchar $method Lengow method API call.
      * @param varchar $array Lengow method API parameters
+     * @param varchar $type type of request GET|POST|PUT|HEAD|DELETE|PATCH
+     * @param varchar $format return format of API
      *
      * @return array The formated data response
      */
-    public function api($method, $array) {
+    public function call($method, $array = array(), $type = 'GET', $format = 'json')
+    {
+        $this->connect();
         try {
-            if(!$api = $this->_getMethod($method))
-                throw new Lengow_Sync_Model_Connector_Exception('Error unknow method API', 3);
-            else
-                $data = $this->_callAction($api['service'], $method, $array);
-        } catch (Lengow_Sync_Model_Connector_Exception $e) {
+            if (!array_key_exists('account_id', $array)) {
+                $array['account_id'] = $this->account_id;
+            }
+            $data = $this->_callAction($method, $array, $type, $format);
+        } catch (Exception $e) {
             return $e->getMessage();
         }
         return $data;
     }
 
-    /**
-     * Call the Lengow service with accepted method.
-     *
-     * @param varchar $service Lengow service name
-     * @param varchar $method Lengow method API call.
-     * @param varchar $array Lengow method API parameters
-     *
-     * @return array The formated data response
-     */
-    private function _callAction($service, $method, $array) {
-        switch ($service) {
-            case 'solution' :
-                $url = $this->_getUrlService($service, $method, $array);
-                break;
-            case 'api' :
-                $url = $this->_getUrlOrders($service, $array);
-                break;
-            case 'statistics' :
-                $url = $this->_getUrlStatistics($service, $array);
-                break;
-        }
-        $result = $this->_makeRequest($url);
-        return $this->_format($result, self::$DOMAIN_LENGOW[$service]['format']);
+    public function get($method, $array = array(), $format = 'json')
+    {
+        return $this->call($method, $array, 'GET', $format);
     }
 
-    /**
-      * Makes the Service API Url.
-      *
-      * @param string $service The URL to make the request to
-      * @param string $array The array of query parameters
-      *
-      * @return string The url
-      */
-    private function _getUrlService($service, $method, $array) {
-        $url = self::$DOMAIN_LENGOW[$service]['protocol']
-             . '://'
-             . self::$DOMAIN_LENGOW[$service]['url']
-             . '/wsdl/connector/call.json?'
-             . 'token=' . $this->token
-             . '&idClient=' . $this->id_customer
-             . '&method=' . $method
-             . '&array=' . urlencode(serialize($array));
-        return $url;
+    public function post($method, $array = array(), $format = 'json')
+    {
+        return $this->call($method, $array, 'POST', $format);
     }
 
-    /**
-      * Makes the Orders API Url.
-      *
-      * @param string $service The URL to make the request to
-      * @param string $array The array of query parameters
-      *
-      * @return string The url
-      */
-    private function _getUrlOrders($service, $array) {
-        $url = self::$DOMAIN_LENGOW[$service]['protocol']
-             . '://'
-             . self::$DOMAIN_LENGOW[$service]['url'] . '/'
-             . 'v2/'
-             . $array['dateFrom'] . '/'
-             . $array['dateTo'] . '/'
-             . $this->id_customer .'/'
-             . $array['id_group'] .'/'
-             . (isset($array['id']) && !empty($array['id']) ? $array['id'] : 'orders')
-             . '/commands/'
-             . (isset($array['state']) && !empty($array['state']) ? $array['state'] . '/' : '');
-        return $url;
+    public function head($method, $array = array(), $format = 'json')
+    {
+        return $this->call($method, $array, 'HEAD', $format);
     }
 
-    /**
-      * Makes the Statisctics API Url.
-      *
-      * @param string $service The URL to make the request to
-      * @param string $array The array of query parameters
-      *
-      * @return string The url
-      */
-    private function _getUrlStatistics($service, $array) {
-        $url = self::$DOMAIN_LENGOW[$service]['protocol']
-             . '://'
-             . self::$DOMAIN_LENGOW[$service]['url']
-             . $array['dateFrom'] . '/'
-             . $array['dateTo'] . '/'
-             . $this->id_customer .'/'
-             . $array['id']
-             . '/total-All/';
-        return $url;
+    public function put($method, $array = array(), $format = 'json')
+    {
+        return $this->call($method, $array, 'PUT', $format);
     }
 
-    /**
-      * Get the method of Lengow API if exist.
-      *
-      * @param string $method The method's name
-      *
-      * @return string The method with service
-      */
-    private function _getMethod($method) {
-        if(self::$API_METHODS_LENGOW[$method])
-            return self::$API_METHODS_LENGOW[$method];
-        else
-            return false;
+    public function delete($method, $array = array(), $format = 'json')
+    {
+        return $this->call($method, $array, 'DELETE', $format);
     }
 
-    /**
-      * Format data with good format.
-      *
-      * @param string $data the data's response of method request
-      * @param string $format the return format
-      *
-      * @return string Data formated
-      */
-    private function _format($data, $format) {
-        switch($format) {
-            case 'xml' :
-                return simplexml_load_string($data, 'SimpleXMLElement', LIBXML_NOCDATA);
-            case 'json' :
+    public function patch($method, $array = array(), $format = 'json')
+    {
+        return $this->call($method, $array, 'PATCH', $format);
+    }
+
+    private function _callAction($api, $args, $type, $format = 'json')
+    {
+        $result = $this->_makeRequest($type, self::LENGOW_API_URL . $api, $args, $this->token);
+        return $this->_format($result, $format);
+    }
+
+    private function _format($data, $format)
+    {
+        switch ($format) {
+            case 'json':
                 return json_decode($data, true);
+            case 'csv':
+                return $data;
+            case 'xml':
+                return simplexml_load_string($data);
+            case 'stream':
+                return $data;
         }
-        return null;
     }
 
-    /**
-      * Makes an HTTP request.
-      *
-      * @param string $url The URL to make the request to
-      *
-      * @return string The response text
-      */
-    protected function _makeRequest($url) {
-        Mage::helper('lensync/data')->log('Connector ' . $url);
+    protected function _makeRequest($type, $url, $args, $token)
+    {
         $ch = curl_init();
         // Options
         $opts = self::$CURL_OPTS;
-        $opts[CURLOPT_URL] = $url;
+        $opts[CURLOPT_CUSTOMREQUEST] = strtoupper($type);
+        $url = parse_url($url);
+        $opts[CURLOPT_PORT] = $url['port'];
+        $opts[CURLOPT_HEADER] = true;
+        $opts[CURLOPT_RETURNTRANSFER] = true;
+        $opts[CURLOPT_VERBOSE] = false;
+        if (isset($token)) {
+            $opts[CURLOPT_HTTPHEADER] = array(
+                'Authorization: '.$token
+            );
+        }
+        $url = $url['scheme'].'://'.$url['host'].$url['path'];
+        switch ($type) {
+            case "GET":
+                $opts[CURLOPT_URL] = $url.'?'.http_build_query($args);
+                Mage::helper('lensync/data')->log('Connector: '.$opts[CURLOPT_URL]);
+                break;
+            case "PATCH":
+                if (isset($token)) {
+                    $opts[CURLOPT_HTTPHEADER] = array_merge(
+                        $opts[CURLOPT_HTTPHEADER],
+                        array('Content-Type: application/json')
+                    );
+                }
+                $opts[CURLOPT_URL] = $url;
+                $opts[CURLOPT_POST] = count($args);
+                $opts[CURLOPT_POSTFIELDS] = json_encode($args);
+                break;
+            default:
+                $opts[CURLOPT_URL] = $url;
+                $opts[CURLOPT_POST] = count($args);
+                $opts[CURLOPT_POSTFIELDS] = http_build_query($args);
+                break;
+        }
         // Exectute url request
         curl_setopt_array($ch, $opts);
         $result = curl_exec($ch);
-        if ($result === false) {
-            Mage::helper('lensync/data')->log('Connector Error (' . curl_error($ch) . ')' . $result);
-            throw new Lengow_Sync_Model_Connector_Exception(
-                array('message' => curl_error($ch),
-                      'type' => 'CurlException',
-                ),
-                curl_errno($ch)
-            );
-        }
+        $error = curl_errno($ch);
+        list($header, $data) = explode("\r\n\r\n", $result, 2);
+        $information = curl_getinfo($ch, CURLINFO_HEADER_OUT);
         curl_close($ch);
-        return $result;
+        if ($data === false) {
+            throw new Exception('Bad request '.$error['code']);
+            return false;
+        }
+        return $data;
+    }
+
+    public function getAccountId()
+    {
+        return $this->account_id;
+    }
+
+    /**
+     * Check API Authentification
+     *
+     * @param integer $account_id Account id
+     *
+     * @return boolean
+     */
+    public function isValidAuth($account_id)
+    {
+        $result = $this->connect();
+        if (isset($result['token']) && $account_id != 0 && is_integer($account_id)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

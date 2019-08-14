@@ -2,7 +2,7 @@
 <!--
 
 /**
- * Copyright 2013 Lengow.
+ * Copyright 2015 Lengow.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -19,7 +19,7 @@
 
  * @category    Lengow
  * @package     Lengow_All
- * @copyright   Copyright (c) 2013 Lengow SAS (http://www.lengow.com)
+ * @copyright   Copyright (c) 2015 Lengow SAS (http://www.lengow.com)
  * @license     http://www.apache.org/licenses/LICENSE-2.0  Apache License 2.0
  */
 -->
@@ -54,19 +54,5 @@
                 <Mage_Sales />
             </depends>
         </Lengow_Tracker>
-        <Lengow_Dashboard>
-            <active>true</active>
-            <codePool>community</codePool>
-            <depends>
-                <Mage_Adminhtml />
-            </depends>
-        </Lengow_Dashboard>
-        <Lengow_Feed>
-            <active>true</active>
-            <codePool>community</codePool>
-            <depends>
-                <Mage_Adminhtml />
-            </depends>
-        </Lengow_Feed>
     </modules>
 </config>

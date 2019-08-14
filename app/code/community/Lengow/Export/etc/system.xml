@@ -83,16 +83,6 @@
                             <show_in_store>1</show_in_store>
                             <source_model>lenexport/system_config_source_status</source_model>
                         </productstatus>
-                        <!--<productchildren>
-                            <label>Export child product</label>
-                            <comment>Export child for configurable product</comment>
-                            <frontend_type>select</frontend_type>
-                            <sort_order>90</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                        </productchildren>-->
                     </fields>
                 </global>
                 <data translate="label comment">

@@ -1,11 +1,16 @@
 <?php
 
 /**
- * Thrown when an WSDL call returns an exception.
+ * Lengow sync model marketplace exception
  *
- * @author Ludovic Drin <ludovic@lengow.com>
+ * @category    Lengow
+ * @package     Lengow_Sync
+ * @author      Team Connector <team-connector@lengow.com>
+ * @copyright   2016 Lengow SAS
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-class Lengow_Sync_Model_Marketplace_Exception extends Exception {
+class Lengow_Sync_Model_Marketplace_Exception extends Exception
+{
 
     /**
      * The result from the WSDL server that represents the exception information.
@@ -17,12 +22,14 @@ class Lengow_Sync_Model_Marketplace_Exception extends Exception {
      *
      * @param array $result The error result
      */
-    public function __construct($result, $noerror) {
+    public function __construct($result, $noerror)
+    {
         $this->result = $result;
-        if(is_array($result))
+        if (is_array($result)) {
             $msg = $result['message'];
-        else
+        } else {
             $msg = $result;
+        }
         parent::__construct($msg, $noerror);
     }
 
@@ -31,18 +38,21 @@ class Lengow_Sync_Model_Marketplace_Exception extends Exception {
      *
      * @return array The result from the WSDL server
      */
-    public function getResult() {
+    public function getResult()
+    {
         return $this->result;
     }
 
     /**
-     * Returns the associated type for the error. 
+     * Returns the associated type for the error.
      *
      * @return string
      */
-    public function getType() {
-        if(isset($this->result['type']))
+    public function getType()
+    {
+        if (isset($this->result['type'])) {
             return $this->result['type'];
+        }
         return 'Lengow_Sync_Model_Marketplace_Exception';
     }
 
@@ -51,9 +61,11 @@ class Lengow_Sync_Model_Marketplace_Exception extends Exception {
      *
      * @return string The string representation of the error
      */
-    public function __toString() {
-        if(isset($this->result['message']))
+    public function __toString()
+    {
+        if (isset($this->result['message'])) {
             return $this->result['message'];
-    return $this->message;
+        }
+        return $this->message;
     }
 }

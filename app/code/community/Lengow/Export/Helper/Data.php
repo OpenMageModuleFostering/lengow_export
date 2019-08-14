@@ -55,7 +55,7 @@ class Lengow_Export_Helper_Data extends Mage_Core_Helper_Abstract {
      * @return string $value
      */
     public function cleanData($value, $convert = false, $html = false) {
-        if ($convert)
+        if ($convert && $html)
             $value = htmlentities($value);
         if(is_array($value))
             return $value;
@@ -93,11 +93,11 @@ class Lengow_Export_Helper_Data extends Mage_Core_Helper_Abstract {
     }
 
     public function convertHTML($html) {
-        $html = str_replace(array('"', "\r", "\n"), 
-                            array('"""', '', ''), 
+        $html = str_replace(array('"', "\r", "\n"),
+                            array('"""', '', ''),
                             trim(nl2br($html)));
         return $html;
-    } 
+    }
 
     protected function _convert($content) {
         if (!mb_check_encoding($content, 'UTF-8') OR !($content === mb_convert_encoding(mb_convert_encoding($content, 'UTF-32', 'UTF-8'), 'UTF-8', 'UTF-32'))) {
@@ -105,5 +105,4 @@ class Lengow_Export_Helper_Data extends Mage_Core_Helper_Abstract {
         }
         return $content;
     }
-
 }

@@ -10,7 +10,7 @@
  */
 class Lengow_Export_Model_Feed_Xml extends Lengow_Export_Model_Feed_Abstract {
 
-    protected $_content_type = 'text/xml';
+    protected $_content_type = 'application/xml';
 
     public function getContentType() {
         return $this->_content_type;

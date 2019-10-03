@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Lengow_Export",
+    "name": "OpenMageModuleFostering\/Lengow_Export",
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
     "description": "New module of Lengow",
     "authors": [
-    {
-        "name": "Lengow",
-        "email": "team-connector@lengow.com"
-    }
-],
+        {
+            "name": "Lengow",
+            "email": "team-connector@lengow.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
